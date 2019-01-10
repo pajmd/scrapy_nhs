@@ -1,17 +1,25 @@
 import csv
-from abc import ABC, abstractmethod, ABCMeta
-import parsers.parser_setting as cfg
+from abc import abstractmethod, ABCMeta
+
+import config as cfg
+
+
+class ParserException(Exception):
+    pass
+
+
+class ParserFileNameException(Exception):
+    pass
 
 
 class Parser(object):
 
-    def __init__(self, filename):
-
-        self.tariff_file = '%s/%s' % (cfg.from_path, filename)
+    def __init__(self, filename, from_path=cfg.FROM_PATH):
+        self.tariff_file = '%s/%s' % (from_path, filename)
 
     @staticmethod
     def is_drug_tariff_part(tariff_period_category_row):
-        return 'Drug Tariff' in tariff_period_category_row[0]
+        return 'Drug Tariff Part' in tariff_period_category_row[0]
 
     def get_parser(self):
         with open(self.tariff_file, 'r') as csvfile:
@@ -51,7 +59,7 @@ class BasicParser(object):
                 medicines.append(medicine)
             return medicines
         else:
-            raise ValueError("Drug tarriff %s doesn't follow the rule" % self.tariff_file)
+            raise ParserException("Drug tariff %s failed, should be a blank row: %s" % (self.tariff_file, blank_line))
 
     @abstractmethod
     def get_category_period_extractor(self, tariff_period_category):
