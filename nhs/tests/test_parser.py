@@ -1,5 +1,6 @@
 from parsers.parser import (
-    Parser
+    Parser,
+    BasicParser
 )
 
 
@@ -19,3 +20,22 @@ def test_category_m():
     json_tariff = specialized_parser.parse()
     print(json_tariff)
     assert json_tariff
+
+
+def test_normalize():
+    row =['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
+    expected =['head1', 'head 2', 'head 3', 'head 4', 'head 5', 'head6', 'head7']
+    norm_row = BasicParser.normalize_row(row)
+    zrow = zip(norm_row, expected)
+    truth = [i[0] == i[1] for i in zrow ]
+    assert all(truth)
+
+
+def test_tolower_row():
+    row = ['heAd1', 'head 2', ' head 3', 'HEAD 4 ', ' Head 5 ', 'head6 ', ' head7']
+    expected = ['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
+    norm_row = BasicParser.tolower_row(row)
+    zrow = zip(norm_row, expected)
+    truth = [i[0] == i[1] for i in zrow ]
+    assert all(truth)
+

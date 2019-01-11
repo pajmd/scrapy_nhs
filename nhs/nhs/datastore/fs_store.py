@@ -19,10 +19,8 @@ class FSstore(object):
                     json.dump(json_tariff, f)
             except ParserException as ex:
                 print('Failed %s: %s' % (cvs_file, ex))
-                raise
             except Exception as ex:
                 print('WTF %s: %s' % (cvs_file, ex))
-                raise
 
     @staticmethod
     def get_json_name(csv_file):
