@@ -1,6 +1,6 @@
 import csv
 from abc import abstractmethod, ABCMeta
-
+import uuid
 import config as cfg
 
 
@@ -66,6 +66,7 @@ class BasicParser(object):
                 medicines = []
                 for line in csvreader:
                     medicine = {
+                        'id': uuid.uuid4().hex,
                         'category': category,
                         'period': period,
                     }
