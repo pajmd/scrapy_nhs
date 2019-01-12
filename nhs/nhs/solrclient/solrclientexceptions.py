@@ -1,0 +1,58 @@
+from solrclient.solrcommands import SolrOp as op, OP
+import json
+
+class CreateCollectionException(Exception):
+    pass
+
+
+class DeleteCollectionException(Exception):
+    pass
+
+
+class AddFieldSchemaException(Exception):
+    pass
+
+
+def get_error(operation_type, operation, response):
+    if operation_type == op.ADMIN:
+        return "Error %s - %s: %s" % (operation_type.name, operation.name, response["exception"]["msg"])
+    elif operation_type == op.SCHEMA:
+        # err = {
+        #     "details": [
+        #         {
+        #         "add-field": {
+        #             "name": "medecine",
+        #             "type": "text_general",
+        #             "multiValued": False,
+        #             "stored": True
+        #         },
+        #         "errorMessages": ["Field 'medecine' already exists.\n"]
+        #         }
+        #     ]
+        # }
+        def extract_error(errors):
+            error = errors[0]
+            for k, v in error.iteritems():
+                if k == 'errorMessages':
+                    errmsg = error[k]
+                else:
+                    op = k
+            return op, errmsg
+        details = response["responseHeader"]["error"]["details"]
+        return "Error %s %s: %s" % (operation_type.name, *extract_error(details))
+
+
+def raise_for_status(operation_type, operation, resp):
+    print(resp)
+    if resp.status_code != 200:
+        response = json.loads(resp.text)
+        if operation_type == op.ADMIN:
+            if response["responseHeader"]["status"] != 0:
+                if operation == op.CREATE_COLLECTION:
+                    raise CreateCollectionException(get_error(operation_type, operation, response))
+                elif operation == op.DELETE_COLLECTION:
+                    raise DeleteCollectionException(get_error(operation_type, operation, response))
+        elif operation_type == op.SCHEMA:
+            if response["responseHeader"]["status"] != 0:
+                if operation == op.ADD_FIELD:
+                    raise AddFieldSchemaException(get_error(operation_type, operation, response))
