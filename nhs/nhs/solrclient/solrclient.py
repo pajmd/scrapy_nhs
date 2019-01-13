@@ -26,13 +26,14 @@ class SolrClient(HttpClient):
     # replicationFactor=2&numSahrdPerNode=2&wt=json"
     # curl "http://localhost:8983/solr/admin/collections?
     # action=CREATE&name=nhsdocs&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
-    def create_collection(self, name, numshards, replication_factor, max_shards_per_node, optional=None):
+    def create_collection(self, name, numshards, replication_factor, max_shards_per_node, collection_configname='_default', optional=None):
         """
         Create a collection
         :param name:
         :param numshards:
         :param replication_factor:
         :param max_shards_per_node:
+        :param collection_configname:
         :param optional: see https://lucene.apache.org/solr/guide/7_3/collections-api.html for extra parameters
         to be passed in a dictionary ex { 'tlogReplicas': 3 }
         :return:
@@ -44,6 +45,7 @@ class SolrClient(HttpClient):
             'numShards': numshards,
             'replicationFactor': replication_factor,
             'maxShardsPerNode': max_shards_per_node,
+            'collection.configName': collection_configname,
             'wt': 'json'
         }
         if optional:
@@ -62,12 +64,12 @@ class SolrClient(HttpClient):
             'wt': 'json'
         }
         r = self.get(command,payload)
-        raise_for_status(operation_type=op.ADMIN, operation=op.DELETE_COLLECTION, response=r)
+        raise_for_status(operation_type=op.ADMIN, operation=op.DELETE_COLLECTION, resp=r)
 
     # curl -X POST -H 'Content-type:application/json'
     # --data-binary '{"add-field": {"name":"name", "type":"text_general", "multiValued":false, "stored":true}}'
     # http://localhost:8983/solr/films/schema
-    def add_field(self, schema, name, fieldtype, multivalued, stored, optional):
+    def add_field(self, schema, name, fieldtype, multivalued, stored, optional=None):
         """
         Add a field to a collection i.e. a schema
         :param schema: collection name
@@ -80,13 +82,17 @@ class SolrClient(HttpClient):
         """
         command = 'solr/%s/schema' % schema
         payload = {
-            'name': name,
-            'type': fieldtype,
-            'multiValued': multivalued,
-            'stored': stored
+            "add-field": {
+                'name': name,
+                'type': fieldtype,
+                'multiValued': multivalued,
+                'stored': stored
+            }
         }
+        if optional:
+            payload["add-field"].update(optional)
         r = self.post(command,payload)
-        raise_for_status(operation_type=op.SCHEMA, operation=op.ADD_FIELD, response=r)
+        raise_for_status(operation_type=op.SCHEMA, operation=op.ADD_FIELD, resp=r)
 
     # curl -X POST -H 'Content-type:application/json'
     # --data-binary '{"add-copy-field" : {"source":"*","dest":"_text_"}}'

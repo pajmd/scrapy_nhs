@@ -18,8 +18,11 @@ class HttpClient(object):
 
     def post(self, url, json_payload):
         r = requests.post(self.full_url(url), headers=self.header, json=json_payload)
-        r.raise_for_status()
-        return r
+        try:
+            r.raise_for_status()
+            return r
+        except requests.HTTPError:
+            return r
 
     def full_url(self, url):
         return '%s/%s' % (self.host, url)

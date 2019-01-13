@@ -1,5 +1,9 @@
 from solrclient.solrclient import SolrClient
-from solrclient.solrclientexceptions import CreateCollectionException
+from solrclient.solrclientexceptions import (
+    CreateCollectionException,
+    DeleteCollectionException,
+    AddFieldSchemaException
+)
 import pytest
 import sys
 
@@ -14,15 +18,7 @@ def curlit(cmd):
     except OSError as e:
         print("Execution failed:", e, file=sys.stderr)
 
-
 # need to add fixture to prepare the terrain (pre-delete, pre-create ...)
-
-#scope should be module
-@pytest.fixture()
-def start_solr():
-    from subprocess import call
-    call(['~/solr-7.6.0/bin/solr', 'start', '-e', 'cloud'])
-
 
 @pytest.fixture()
 def predelete_collection():
@@ -35,12 +31,16 @@ def fixture_delete_collection():
     def fixture_delete_collection_(name):
         cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % name
         curlit(cmd)
+        cmd =  "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % name
+        curlit(cmd)
     return fixture_delete_collection_
 
 # fixture that can receive a parameter
 @pytest.fixture()
 def fixture_create_collection():
     def fixture_create_collection_(name):
+        cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % name
+        curlit(cmd)
         cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % name
         curlit(cmd)
     return fixture_create_collection_
@@ -88,9 +88,29 @@ def test_create_collection_error_param(fixture_create_collection, fixture_delete
         slrclient.create_collection(name, 2, 2, 2)
         fixture_delete_collection(name)
 
-def test_delete_collection():
-    pass
+def test_delete_collection(fixture_create_collection, fixture_delete_collection):
+    name = 'stuffy'
+    fixture_create_collection(name)
+    slrclient = SolrClient(host='localhost', port=8983)
+    slrclient.delete_collection(name)
+    fixture_delete_collection(name)
+    assert True
 
 
-def test_delete_collectio_error():
-    pass
+def test_delete_collectio_error(fixture_delete_collection):
+    name = 'stuffy'
+    fixture_delete_collection(name)
+    with pytest.raises(DeleteCollectionException):
+        slrclient = SolrClient(host='localhost', port=8983)
+        slrclient.delete_collection(name)
+
+
+def test_add_field(fixture_create_collection, fixture_delete_collection):
+    collection = 'stuffy'
+    fixture_create_collection(collection)
+    slrclient = SolrClient(host='localhost', port=8983)
+    slrclient.add_field(collection, name='a_field', fieldtype="text_general", multivalued=False, stored=True)
+    with pytest.raises(AddFieldSchemaException):
+        slrclient.add_field(collection, name='a_field', fieldtype="text_general", multivalued=False, stored=True)
+    fixture_delete_collection(collection)
+    assert True

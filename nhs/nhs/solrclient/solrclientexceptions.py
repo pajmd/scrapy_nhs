@@ -32,13 +32,13 @@ def get_error(operation_type, operation, response):
         # }
         def extract_error(errors):
             error = errors[0]
-            for k, v in error.iteritems():
+            for k, v in error.items():
                 if k == 'errorMessages':
                     errmsg = error[k]
                 else:
                     op = k
             return op, errmsg
-        details = response["responseHeader"]["error"]["details"]
+        details = response["error"]["details"]
         return "Error %s %s: %s" % (operation_type.name, *extract_error(details))
 
 
