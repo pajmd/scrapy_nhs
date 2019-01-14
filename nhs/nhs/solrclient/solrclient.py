@@ -116,7 +116,20 @@ class SolrClient(HttpClient):
     def add_documents(self):
         pass
 
-    # curl 'http://localhost:8983/solr/techproducts/update?
-    # commit=true' --data-binary @example/exampledocs/books.json -H 'Content-type:application/json'
-    def add_document_file(self):
-        pass
+    # curl 'http://localhost:8983/solr/techproducts/update?commit=true'
+    #  --data-binary @example/exampledocs/books.json -H 'Content-type:application/json'
+    def add_document_file(self, collection, files, commit=True):
+        """
+        indexes a file or a list of file (a file is made up of documents)
+        :param collection:
+        :param files:  a file or a list of file
+        :param commit:
+        :return: a single or a list of requests.Response()
+        """
+        command = 'solr/%s/update?%s' % (collection, ('true' if commit else 'false'))
+        header = {
+            'Content-type': 'application/json'
+        }
+        r = self.post(command, files=files, header=header)
+
+        raise_for_status(operation_type=op.INDEXING, operation=op.ADD_FILE, resp=r)

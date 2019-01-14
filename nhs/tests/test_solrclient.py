@@ -4,6 +4,7 @@ from solrclient.solrclientexceptions import (
     DeleteCollectionException,
     AddFieldSchemaException
 )
+from nhs.tests.utiltest import get_resource
 import pytest
 import sys
 
@@ -114,3 +115,14 @@ def test_add_field(fixture_create_collection, fixture_delete_collection):
         slrclient.add_field(collection, name='a_field', fieldtype="text_general", multivalued=False, stored=True)
     fixture_delete_collection(collection)
     assert True
+
+
+@pytest.mark.parametrize("collection, files", [
+    ('stuffy', get_resource('test_drug_part_m.json', 'json')),
+    ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
+])
+def test_add_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
+    fixture_create_collection(collection)
+    slrclient = SolrClient(host='localhost', port=8983)
+    slrclient.add_document_file(collection, files, commit=True)
+    fixture_delete_collection(collection)

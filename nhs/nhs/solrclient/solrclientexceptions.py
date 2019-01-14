@@ -1,5 +1,6 @@
-from solrclient.solrcommands import SolrOp as op, OP
+from solrclient.solrcommands import SolrOp as op
 import json
+
 
 class CreateCollectionException(Exception):
     pass
@@ -43,8 +44,24 @@ def get_error(operation_type, operation, response):
 
 
 def raise_for_status(operation_type, operation, resp):
+    """
+    reaises an exception at the first erro found
+    :param operation_type:
+    :param operation:
+    :param resp: a single or a list of requests.Response()
+    :return:
+    """
+    if isinstance(resp, list):
+        for r in resp:
+            inspect(operation_type, operation,r)
+    else:
+        inspect(operation_type, operation,resp)
+
+
+def inspect(operation_type, operation, resp):
     print(resp)
     if resp.status_code != 200:
+        # TODO should use resp.json()
         response = json.loads(resp.text)
         if operation_type == op.ADMIN:
             if response["responseHeader"]["status"] != 0:

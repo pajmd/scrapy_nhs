@@ -7,11 +7,7 @@ class SolrOp(Enum):
     CREATE_COLLECTION = 2
     DELETE_COLLECTION = 3
     SCHEMA = 10,
-    ADD_FIELD = 11
+    ADD_FIELD = 11,
+    INDEXING=20,
+    ADD_FILE=21
 
-OP = {
-    SolrOp.ADMIN: [
-        SolrOp.CREATE_COLLECTION,
-        SolrOp.DELETE_COLLECTION
-    ]
-}

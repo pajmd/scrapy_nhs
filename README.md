@@ -6,6 +6,8 @@ https://groups.google.com/forum/#!topic/scrapy-users/kzGHFjXywuY
 
 ##. https://doc.scrapy.org/en/latest/topics/media-pipeline.html
 
+## scrapy architecture
+https://doc.scrapy.org/en/latest/topics/architecture.html
 
 ## Solr with separate zookeepers: 
 https://docs.microfocus.com/UCMDB/2018.05/ucmdb-docs/docs/eng/doc_lib/Content/admin/ConfigSolrCloud_w_ZookeeperEnsemble.htm
