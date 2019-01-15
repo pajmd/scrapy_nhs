@@ -27,21 +27,28 @@ def predelete_collection():
     curlit(cmd)
 
 # fixture that can receive a parameter
+def fixure_helper_delete_collection(collection):
+    cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % collection
+    curlit(cmd)
+    cmd = "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % collection
+    curlit(cmd)
+
+
 @pytest.fixture()
 def fixture_delete_collection():
     def fixture_delete_collection_(name):
-        cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % name
-        curlit(cmd)
-        cmd =  "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % name
-        curlit(cmd)
+        fixure_helper_delete_collection(name)
+        # cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % name
+        # curlit(cmd)
+        # cmd =  "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % name
+        # curlit(cmd)
     return fixture_delete_collection_
 
 # fixture that can receive a parameter
 @pytest.fixture()
 def fixture_create_collection():
     def fixture_create_collection_(name):
-        cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % name
-        curlit(cmd)
+        fixure_helper_delete_collection(name)
         cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % name
         curlit(cmd)
     return fixture_create_collection_
@@ -119,10 +126,18 @@ def test_add_field(fixture_create_collection, fixture_delete_collection):
 
 @pytest.mark.parametrize("collection, files", [
     ('stuffy', get_resource('test_drug_part_m.json', 'json')),
-    ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
+    # ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
 ])
 def test_add_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
     fixture_create_collection(collection)
     slrclient = SolrClient(host='localhost', port=8983)
+    options = {
+        'stored': True,
+        'indexed': True,
+        'docValues': True
+    }
+    slrclient.add_field(collection, name='Pack Size', fieldtype="pfloat", multivalued=False, stored=True,
+                        optional=options)
+
     slrclient.add_document_file(collection, files, commit=True)
     fixture_delete_collection(collection)

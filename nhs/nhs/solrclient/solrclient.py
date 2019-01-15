@@ -19,8 +19,8 @@ class SolrClient(HttpClient):
     # curl -X POST -H 'Content-type:application/json'
     # --data-binary '{"add-field": {"name":"medicine", "type":"text_general", "multiValued":false, "stored":true}}'
     #  http://localhost:8983/solr/nhsdocs/schema
-    def add_field(self):
-        pass
+    # def add_field(self):
+    #     pass
 
     #  /admin/collections?action=CREATE&name=name
     # replicationFactor=2&numSahrdPerNode=2&wt=json"
@@ -100,6 +100,7 @@ class SolrClient(HttpClient):
     def add_copy_field(self):
         pass
 
+    # http://lucene.apache.org/solr/guide/7_6/uploading-data-with-index-handlers.html
     # curl -X POST -H 'Content-Type: application/json' 'http://localhost:8983/solr/my_collection/update/json/docs' --data-binary '
     # {
     #   "id": "1",

@@ -14,6 +14,10 @@ class AddFieldSchemaException(Exception):
     pass
 
 
+class IndexingFileException(Exception):
+    pass
+
+
 def get_error(operation_type, operation, response):
     if operation_type == op.ADMIN:
         return "Error %s - %s: %s" % (operation_type.name, operation.name, response["exception"]["msg"])
@@ -59,10 +63,10 @@ def raise_for_status(operation_type, operation, resp):
 
 
 def inspect(operation_type, operation, resp):
-    print(resp)
+    print("%s - %s: %s" % (operation_type, operation, resp))
     if resp.status_code != 200:
-        # TODO should use resp.json()
-        response = json.loads(resp.text)
+        response =  resp.json()
+        # response = json.loads(resp.text)
         if operation_type == op.ADMIN:
             if response["responseHeader"]["status"] != 0:
                 if operation == op.CREATE_COLLECTION:
@@ -73,3 +77,7 @@ def inspect(operation_type, operation, resp):
             if response["responseHeader"]["status"] != 0:
                 if operation == op.ADD_FIELD:
                     raise AddFieldSchemaException(get_error(operation_type, operation, response))
+        elif operation_type == op.INDEXING:
+            if response["responseHeader"]["status"] != 0:
+                if operation == op.ADD_FILE:
+                    raise IndexingFileException(get_error(operation_type, operation, response))
