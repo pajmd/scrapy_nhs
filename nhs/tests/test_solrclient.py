@@ -19,18 +19,37 @@ def curlit(cmd):
     except OSError as e:
         print("Execution failed:", e, file=sys.stderr)
 
-# need to add fixture to prepare the terrain (pre-delete, pre-create ...)
+
+################# tearup and teardown fixtures #################
+
+#### I did not use the folowing 2 the pre... fixtures because the can't accept parameters
+
+# this fixture works fine  and does a tear up and tera down but can't receive parameters
+# so I just create 2 fixtures that can receive parameters one une as
+# tear up and the other as teardown that must be call in the test case
+@pytest.fixture()
+def precreate_collection():
+    cmd = "http://localhost:8983/solr/admin/collections?action=CREATE' \
+    '&name=stuff&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
+    curlit(cmd)
+    yield 'nothing to yield'
+    # delete connection
+    cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=stuff&wt=json"
+    curlit(cmd)
+
 
 @pytest.fixture()
 def predelete_collection():
     cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=stuff&wt=json"
     curlit(cmd)
+###
+
 
 # fixture that can receive a parameter
 def fixure_helper_delete_collection(collection):
     cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=%s&wt=json" % collection
     curlit(cmd)
-    cmd = "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % collection
+    cmd = "http://localhost:8983/solr/admin/configs?action=DELETE&name=%sConfig" % collection
     curlit(cmd)
 
 
@@ -49,23 +68,12 @@ def fixture_delete_collection():
 def fixture_create_collection():
     def fixture_create_collection_(name):
         fixure_helper_delete_collection(name)
-        cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % name
+        cmd = "http://localhost:8983/solr/admin/configs?action=CREATE&name=%sConfig&baseConfigSet=GoldenCopyConfig&configSetProp.immutable=false&wt=json&omitHeader=true" % name
+        curlit(cmd)
+        cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&collection.configName=%sConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % (name, name)
         curlit(cmd)
     return fixture_create_collection_
 
-
-# this fixture works fine  and does a tear up and tera down but can't receive parameters
-# so I just create 2 fixtures that can receive parameters one une as
-# tear up and the other as teardown that must be call in the test case
-@pytest.fixture()
-def precreate_collection():
-    cmd = "http://localhost:8983/solr/admin/collections?action=CREATE' \
-    '&name=stuff&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
-    curlit(cmd)
-    yield 'nothing to yield'
-    # delete connection
-    cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=stuff&wt=json"
-    curlit(cmd)
 
 
 def test_create_collection(predelete_collection):

@@ -63,7 +63,7 @@ def raise_for_status(operation_type, operation, resp):
 
 
 def inspect(operation_type, operation, resp):
-    print("%s - %s: %s" % (operation_type, operation, resp))
+    print("%s - %s: %s" % (operation_type.name, operation.name, resp))
     if resp.status_code != 200:
         response =  resp.json()
         # response = json.loads(resp.text)

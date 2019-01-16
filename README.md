@@ -22,7 +22,7 @@ Collection has its own schema, configuration and index data directory.
 
 Create collection manually http://makble.com/how-to-create-new-collection-in-solr
 
-## solr configsets creation, deletion
+## solr configsets creation, deletion API
 https://lucene.apache.org/solr/guide/7_6/config-sets.html
 https://lucene.apache.org/solr/guide/7_6/configsets-api.html#configsets-api
 
@@ -59,6 +59,22 @@ specific field GET /collection/schema/fields/fieldname
 #### list all the field types
 curl http://localhost:8983/solr/gettingstarted/schema/fieldtypes?wt=json
 
+## Zookeeper - Configsets
+https://chakrayel.wordpress.com/2017/11/08/updating-zookeeper-configuration-files-in-solrcloud-collection/
+In SolrCloud configsets are stored under zookeeper trees structures.
+See http://localhost:8983/solr/#/~cloud?view=tree
+#### zkcli commands
+https://lucene.apache.org/solr/guide/7_6/command-line-utilities.html
+#### Only way to update solrconfig.xml
+Upload a Configuration Directory
+./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname my_new_config -confdir server/solr/configsets/_default/conf
+#### To check the new solrconfig.xml
+http://localhost:8983/solr/#/~cloud?view=tree
+##### for the particular collection stuffy
+http://localhost:8983/solr/#/stuffy/files?file=solrconfig.xml
+
+I appears the solrconfig.xml in the collection is updated right away when the configset solrconfig.xml is uploaded.
+
 
 # Note:
 #### Indexing a document for a collection defined with the _default configset 
@@ -69,3 +85,5 @@ transform fields so if a field contains a space it will be replace with a _
     <str name="pattern">[^\w-\.]</str>
     <str name="replacement">_</str>
 </updateProcessor>
+
+see https://lucene.apache.org/solr/guide/7_6/configuring-solrconfig-xml.html to mange solrconfig.xml
