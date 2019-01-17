@@ -173,7 +173,7 @@ class SolrClient(HttpClient):
         :param commit:
         :return: a single or a list of requests.Response()
         """
-        command = 'solr/%s/update?%s' % (collection, ('true' if commit else 'false'))
+        command = 'solr/%s/update?commit=%s' % (collection, ('true' if commit else 'false'))
         header = {
             'Content-type': 'application/json'
         }

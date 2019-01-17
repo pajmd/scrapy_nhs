@@ -45,6 +45,10 @@ def get_error(operation_type, operation, response):
             return op, errmsg
         details = response["error"]["details"]
         return "Error %s %s: %s" % (operation_type.name, *extract_error(details))
+    elif operation_type == op.INDEXING:
+        return "Error %s - %s: %s" % (operation_type.name, operation.name, response['error']['msg'])
+    else:
+        return "Error %s - %s: %s" % (operation_type.name, operation.name, response)
 
 
 def raise_for_status(operation_type, operation, resp):
@@ -80,4 +84,4 @@ def inspect(operation_type, operation, resp):
         elif operation_type == op.INDEXING:
             if response["responseHeader"]["status"] != 0:
                 if operation == op.ADD_FILE:
-                    raise IndexingFileException(get_error(operation_type, operation, response))
+                    raise IndexingFileException(get_error(operation_type, operation,response))

@@ -170,3 +170,31 @@ def test_add_fields_and_document_file(fixture_create_collection, fixture_delete_
 
     slrclient.add_document_files(collection, files, commit=True)
     fixture_delete_collection(collection)
+
+
+def test_adding_fields_to_del():
+    slrclient = SolrClient(host='localhost', port=8983)
+    fields = get_json_resource('nhs_field_list.json', 'json')
+    slrclient.add_fields("stuffy", fields)
+
+def test_indexing_to_del():
+    slrclient = SolrClient(host='localhost', port=8983)
+    slrclient.add_document_files("stuffy", [
+        get_resource('test_drug_part_m.json', 'json'),
+        get_resource('test_drug_part_m_may.json', 'json')
+    ], commit=True)
+
+
+def test_one_field_to_del():
+    slrclient = SolrClient(host='localhost', port=8983)
+    fields = [
+        {
+            "add-field": {
+                "name": "Spec Cont Ind",
+                "type": "text_general",
+                "multiValued": False,
+                "stored": True
+            }
+        }
+    ]
+    slrclient.add_fields("stuffy", fields)

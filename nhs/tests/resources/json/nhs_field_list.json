@@ -31,6 +31,22 @@
   },
   {
     "add-field": {
+      "name": "Special Container",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "Spec Cont Ind",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
       "name": "unit",
       "type": "text_general",
       "multiValued": false,

@@ -9,6 +9,12 @@ If one wants to start from a clean slate with a collection that is been worked o
 one has to delete both collection and configset to get rid of previously added fields. 
 Therefore to recreate the collection one would have to copy GoldenCopyConfig to
  a new config name and create a collection with this config name.
+ 
+The _default config is schemaless which is not recommended:
+If one has add-unknown-fields-to-the-schema configured in the update processor 
+chain in solrconfig.xml, one is using schemaless mode.
+I removed this update processeur from the chain
+
 #### The purpose of GoldenCopyConfig 
 is to have a custom soloarconfig.xml where
  the mutating field update processor is removed from the chain of update precessor

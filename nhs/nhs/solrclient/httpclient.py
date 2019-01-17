@@ -66,16 +66,16 @@ class HttpClient(object):
     def post_files(url, headers, files):
         if isinstance(files, list):
             with requests.session() as s:
-                responses = []
                 for file in files:
                     with open(file, 'rb') as f:
                         r = s.post(url, data=f, headers=headers)
                     try:
+                        # any other exception like ConnexionException would be thrown
                         r.raise_for_status()
-                        responses.append(r)
                     except requests.HTTPError:
-                        responses.append(r)
-            return responses
+                        # we fail at the first troublesome file
+                        return r
+            return r
         else:
             with open(files, 'rb') as f:
                 r = requests.post(url, data=f, headers=headers)

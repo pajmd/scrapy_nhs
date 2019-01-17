@@ -75,6 +75,14 @@ http://localhost:8983/solr/#/stuffy/files?file=solrconfig.xml
 
 I appears the solrconfig.xml in the collection is updated right away when the configset solrconfig.xml is uploaded.
 
+## Solr querying
+#### field containing space
+To query a fields containing space "This Is A Field" one needs to escapthe space i.e.: 
+"This\ Is\ A\\ Field"
+http://localhost:8983/solr/#/stuffy/queryselect?q"=Pack\ Size:5
+
+#### field not null
+Special\ Container:[* TO *]
 
 # Note:
 #### Indexing a document for a collection defined with the _default configset 
