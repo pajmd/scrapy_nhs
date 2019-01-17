@@ -4,9 +4,10 @@ from solrclient.solrclientexceptions import (
     DeleteCollectionException,
     AddFieldSchemaException
 )
-from nhs.tests.utiltest import get_resource
+from nhs.tests.utiltest import get_resource, get_json_resource, get_bin_resource
 import pytest
 import sys
+
 
 def curlit(cmd):
     from subprocess import call
@@ -42,6 +43,8 @@ def precreate_collection():
 def predelete_collection():
     cmd = "http://localhost:8983/solr/admin/collections?action=DELETE&name=stuff&wt=json"
     curlit(cmd)
+
+
 ###
 
 
@@ -61,7 +64,9 @@ def fixture_delete_collection():
         # curlit(cmd)
         # cmd =  "http://localhost:8983/solr/admin/configs?action=DELETE&name=%s.AUTOCREATED" % name
         # curlit(cmd)
+
     return fixture_delete_collection_
+
 
 # fixture that can receive a parameter
 @pytest.fixture()
@@ -70,10 +75,11 @@ def fixture_create_collection():
         fixure_helper_delete_collection(name)
         cmd = "http://localhost:8983/solr/admin/configs?action=CREATE&name=%sConfig&baseConfigSet=GoldenCopyConfig&configSetProp.immutable=false&wt=json&omitHeader=true" % name
         curlit(cmd)
-        cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&collection.configName=%sConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % (name, name)
+        cmd = "http://localhost:8983/solr/admin/collections?action=CREATE&name=%s&collection.configName=%sConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json" % (
+        name, name)
         curlit(cmd)
-    return fixture_create_collection_
 
+    return fixture_create_collection_
 
 
 def test_create_collection(predelete_collection):
@@ -103,6 +109,7 @@ def test_create_collection_error_param(fixture_create_collection, fixture_delete
         slrclient = SolrClient(host='localhost', port=8983)
         slrclient.create_collection(name, 2, 2, 2)
         fixture_delete_collection(name)
+
 
 def test_delete_collection(fixture_create_collection, fixture_delete_collection):
     name = 'stuffy'
@@ -147,5 +154,19 @@ def test_add_document_file(fixture_create_collection, fixture_delete_collection,
     slrclient.add_field(collection, name='Pack Size', fieldtype="pfloat", multivalued=False, stored=True,
                         optional=options)
 
-    slrclient.add_document_file(collection, files, commit=True)
+    slrclient.add_document_files(collection, files, commit=True)
+    fixture_delete_collection(collection)
+
+
+@pytest.mark.parametrize("collection, files", [
+    ('stuffy', get_resource('test_drug_part_m.json', 'json')),
+    # ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
+])
+def test_add_fields_and_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
+    fixture_create_collection(collection)
+    slrclient = SolrClient(host='localhost', port=8983)
+    fields = get_json_resource('nhs_field_list.json', 'json')
+    slrclient.add_fields(collection, fields)
+
+    slrclient.add_document_files(collection, files, commit=True)
     fixture_delete_collection(collection)

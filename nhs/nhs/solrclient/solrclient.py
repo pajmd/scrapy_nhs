@@ -3,6 +3,7 @@ from solrclient.solrclientexceptions import raise_for_status
 from solrclient.solrcommands import SolrOp as op
 from requests.exceptions import HTTPError
 
+
 # https://lucene.apache.org/solr/guide/7_3/collections-api.html
 
 # https://lucene.apache.org/solr/guide/7_6/uploading-data-with-index-handlers.html#solr-style-json
@@ -12,7 +13,6 @@ from requests.exceptions import HTTPError
 # good read https://doc.lucidworks.com/lucidworks-hdpsearch/2.5/Guide-Solr.html
 
 class SolrClient(HttpClient):
-
     def __init__(self, host, port, timeout=5):
         super(SolrClient, self).__init__(host, port, timeout)
 
@@ -26,7 +26,8 @@ class SolrClient(HttpClient):
     # replicationFactor=2&numSahrdPerNode=2&wt=json"
     # curl "http://localhost:8983/solr/admin/collections?
     # action=CREATE&name=nhsdocs&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
-    def create_collection(self, name, numshards, replication_factor, max_shards_per_node, collection_configname='_default', optional=None):
+    def create_collection(self, name, numshards, replication_factor, max_shards_per_node,
+                          collection_configname='_default', optional=None):
         """
         Create a collection
         :param name:
@@ -50,10 +51,8 @@ class SolrClient(HttpClient):
         }
         if optional:
             payload.update(optional)
-        r = self.get(command,payload)
+        r = self.get(command, payload)
         raise_for_status(operation_type=op.ADMIN, operation=op.CREATE_COLLECTION, resp=r)
-
-
 
     # http://localhost:8983/solr/admin/collections?action=DELETE&name=newCollection&wt=xml
     def delete_collection(self, name):
@@ -63,7 +62,7 @@ class SolrClient(HttpClient):
             'name': name,
             'wt': 'json'
         }
-        r = self.get(command,payload)
+        r = self.get(command, payload)
         raise_for_status(operation_type=op.ADMIN, operation=op.DELETE_COLLECTION, resp=r)
 
     # curl -X POST -H 'Content-type:application/json'
@@ -89,9 +88,56 @@ class SolrClient(HttpClient):
                 'stored': stored
             }
         }
+
         if optional:
             payload["add-field"].update(optional)
-        r = self.post(command,payload)
+        r = self.post(command, json_payload=payload)
+        raise_for_status(operation_type=op.SCHEMA, operation=op.ADD_FIELD, resp=r)
+
+    def add_fields(self, schema, fields):
+        """
+        Add a set of fields to a collection i.e. a schema
+
+        ex:
+        fields = [
+            {
+              "add-copy-field" : {
+                "source":"*",
+                "dest":"_text_"
+              }
+            },
+            {
+              "add-field":{
+                 "name":"category",
+                 "type":"text_general",
+                 "multiValued":false,
+                 "stored":true },
+            },
+            {
+              "add-field":{
+                 "name":"Formulations",
+                 "type":"text_general",
+                 "multiValued":true,
+                 "stored":true },
+            },
+            {
+              "add-field":{
+                 "name":"Medicine",
+                 "type":"text_general",
+                 "multiValued":false,
+                 "stored":true }
+            },
+        ]
+        :param schema: collection name
+        :param name:
+        :param fields: a list of dict of several field commands or copy field commands...
+        :return:
+        """
+        headers = {
+            'Content-type': 'application/json'
+        }
+        command = 'solr/%s/schema' % schema
+        r = self.post(command, fields=fields, header=headers)
         raise_for_status(operation_type=op.SCHEMA, operation=op.ADD_FIELD, resp=r)
 
     # curl -X POST -H 'Content-type:application/json'
@@ -119,7 +165,7 @@ class SolrClient(HttpClient):
 
     # curl 'http://localhost:8983/solr/techproducts/update?commit=true'
     #  --data-binary @example/exampledocs/books.json -H 'Content-type:application/json'
-    def add_document_file(self, collection, files, commit=True):
+    def add_document_files(self, collection, files, commit=True):
         """
         indexes a file or a list of file (a file is made up of documents)
         :param collection:

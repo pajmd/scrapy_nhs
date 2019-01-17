@@ -20,39 +20,30 @@ class HttpClient(object):
         except requests.HTTPError:
             return r
 
-    def post(self, url, json_payload=None, header=None, files=None):
+    def post(self, url, json_payload=None, fields=None, files=None, header=None):
         """
         Post either a json payload or files
         :param url:
-        :param json_payload:
-        :param header:
+        :param json_payload: json object
+        :param fields: list of dict, each dict is a field command
         :param files: single file as a string or a list of files. It is best to pass the full path of a  each file.
+        :param header:
         :return: an requests.Response() or list of requests.Response()
         """
+        if not self.is_one_olny_set(json_payload, fields, files):
+            raise HttpClientException("Error POST - can post only one of json_payload fields, or files")
+
         headers = self.header.copy()
         if header:
             headers.update(header)
+        host_url = self.full_url(url)
 
-        if (json_payload and files) or (json_payload is None and files is None):
-            raise HttpClientException("Error POST - can't post both json_payload and files")
         if files:
-            if isinstance(files, list):
-                with requests.session() as s:
-                    responses = []
-                    for file in files:
-                        with open(file, 'rb') as f:
-                            r = s.post(self.full_url(url), data=f, headers=headers)
-                        try:
-                            r.raise_for_status()
-                            responses.append(r)
-                        except requests.HTTPError:
-                            responses.append(r)
-                return responses
-            else:
-                with open(files, 'rb') as f:
-                    r = requests.post(self.full_url(url), data=f, headers=headers)
+            r = self.post_files(host_url, headers, files)
+        elif fields:
+            r = self.post_fields(host_url, headers, fields)
         else:
-            r = requests.post(self.full_url(url), headers=headers, json=json_payload)
+            r = self.post_json(host_url, headers, json_payload)
         try:
             r.raise_for_status()
             return r
@@ -61,3 +52,38 @@ class HttpClient(object):
 
     def full_url(self, url):
         return '%s/%s' % (self.host, url)
+
+    @staticmethod
+    def is_one_olny_set(*p):
+        more_than_one__or_name_set = sum(map(bool, [*p])) == 1
+        return more_than_one__or_name_set
+
+    @staticmethod
+    def post_json(url, headers, json_payload):
+        return requests.post(url, headers=headers, json=json_payload)
+
+    @staticmethod
+    def post_files(url, headers, files):
+        if isinstance(files, list):
+            with requests.session() as s:
+                responses = []
+                for file in files:
+                    with open(file, 'rb') as f:
+                        r = s.post(url, data=f, headers=headers)
+                    try:
+                        r.raise_for_status()
+                        responses.append(r)
+                    except requests.HTTPError:
+                        responses.append(r)
+            return responses
+        else:
+            with open(files, 'rb') as f:
+                r = requests.post(url, data=f, headers=headers)
+            return r
+
+    @staticmethod
+    def post_fields(url, headers, fields):
+        scmdlist = ['%s:%s' % (k, v) for cmd in fields for k, v in cmd.items()]
+        sflist = '{%s}' % ','.join(scmdlist)
+        r = requests.post(url, data=sflist, headers=headers)
+        return r

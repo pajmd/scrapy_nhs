@@ -1,0 +1,72 @@
+[
+  {
+    "add-copy-field": {
+      "source": "*",
+      "dest": "_text_"
+    }
+  },
+  {
+    "add-field": {
+      "name": "category",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "Formulations",
+      "type": "text_general",
+      "multiValued": true,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "Medicine",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "unit",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "period",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "Pack Size",
+      "type": "pfloat",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "VMPP Snomed Code",
+      "type": "text_general",
+      "multiValued": false,
+      "stored": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "Basic Price",
+      "type": "pfloat",
+      "multiValued": false,
+      "stored": true
+    }
+  }
+]

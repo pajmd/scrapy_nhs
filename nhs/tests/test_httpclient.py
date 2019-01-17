@@ -51,3 +51,14 @@ def test_post(mock_open, monkeypatch, jsonpayload, files, header, expected):
             assert str(ri) == expected[i]
     else:
         assert str(r) == expected
+
+@pytest.mark.parametrize("p1, p2, p3, expected", [
+    ({'json': 'object'}, [1, 'list'], 'string', False),
+    (None, [1, 'list'], None, True),
+    (None, None, None, False),
+    (None, None, 2, True),
+])
+def test_is_one_olny_set(p1, p2, p3, expected):
+    rc = HttpClient.is_one_olny_set(p1, p2, p3)
+    assert expected == rc
+
