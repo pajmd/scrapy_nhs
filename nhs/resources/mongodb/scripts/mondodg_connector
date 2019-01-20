@@ -1,0 +1,21 @@
+#
+# https://github.com/yougov/mongo-connector
+#
+
+# mongo-connector -m <mongodb server hostname>:<replica set port> \
+#                -t <replication endpoint URL, e.g. http://localhost:8983/solr> \
+#                -d <name of doc manager, e.g., solr_doc_manager>
+
+
+mongo-connector -m localhost:27017 -t http://localhost:8983/solr/stuffy -d solr_doc_manager
+
+Better
+
+mongo-connector --unique-key=id –n <db>.<collection> -m localhost:27017 -t http://localhost:8983/solr/wlslog -d solr_doc_manager
+-n (namespace) to store collection <collection> from databse <db>
+--unique-key=UNIQUE_KEY
+    The name of the MongoDB field that will serve as the
+    unique key for the target system (for me solr)
+
+
+mongo-connector --unique-key=id –n nhsdb.nshCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager

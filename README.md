@@ -83,6 +83,9 @@ http://localhost:8983/solr/#/stuffy/queryselect?q"=Pack\ Size:5
 
 #### field not null
 Special\ Container:[* TO *]
+It is possible to specify the field is empty at indexing time se:
+https://stackoverflow.com/questions/10722145/solr-how-do-i-construct-a-query-that-requires-a-not-null-location-field
+
 
 # Note:
 #### Indexing a document for a collection defined with the _default configset 
@@ -95,3 +98,16 @@ transform fields so if a field contains a space it will be replace with a _
 </updateProcessor>
 
 see https://lucene.apache.org/solr/guide/7_6/configuring-solrconfig-xml.html to mange solrconfig.xml
+
+
+# Mongodb
+#### To check th configuation on the deamon
+In mongo shell:
+db.adminCommand("getCmdLineOpts")
+
+#### to initiate replication
+In mongo shell: 
+rs.initiate()
+
+
+

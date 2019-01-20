@@ -1,0 +1,39 @@
+# because we added replication in mongod conf
+# We first need to initiate replication
+rs.initiate()
+
+
+# mogo commands:
+# https://docs.mongodb.com/manual/reference/method/
+
+
+show dbs
+use nhsdb
+a = {
+	"category" : "Drug Tariff Part VIIIB",
+	"Formulations" : "SF, STD, LF, CF",
+	"Medicine" : "Zopiclone 7.5mg/5ml oral solution",
+	"Special Container" : "",
+	"Pack Size" : "100",
+	"id" : "d5e5a52c48fa4d93b763d942c294f4ac",
+	"unit" : "ml",
+	"period" : "February",
+	"VMPP Snomed Code" : "24441111000001101",
+	"Basic Price" : "7863"
+}
+
+b = {
+	"category" : "Drug Tariff Part VIIIB",
+	"Formulations" : "SF, STD, LF, CF, NSF",
+	"Medicine" : "Zopiclone 7.5mg/5ml oral suspension",
+	"Special Container" : "",
+	"Pack Size" : "1",
+	"id" : "3f3cd60d52754cd0a74072b50388976f",
+	"unit" : "ml",
+	"period" : "February",
+	"VMPP Snomed Code" : "8734311000001106",
+	"Basic Price" : "15"
+}
+
+db.nhscollection.instert([a,b])
+db.nhscollection.find()
