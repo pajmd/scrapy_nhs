@@ -1,0 +1,24 @@
+# Solr
+# create a generic configset and add to solrconfig.xml
+<requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+This request handler is used by Mongo Connector to find out the collection's fields
+
+./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname mongoConnectorBaseConfig -confdir /home/pjmd/python_workspace/PycharmProjects/scrapy_tuto/nhs/resources/solr/configsets/mongoConnectorConfig/conf
+
+# duplicate this config so th copy can be easily discarded and re-created
+# (necessary because the fields are added to the manged schema and can only be delete along with the config)
+
+curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
+
+- create nhsCollection
+curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=nhsCollection&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
+
+- besides the nhs fields add to the ManagedSchema:
+<field name="_ts" type="long" indexed="true" stored="true" />
+<field name="ns" type="string" indexed="true" stored="true"/>
+
+
+# mongo
+- create a db nhsdb
+- create a collection nshCollection
+
