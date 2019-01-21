@@ -2,7 +2,8 @@ import csv
 from abc import abstractmethod, ABCMeta
 import uuid
 import config as cfg
-
+from openpyxl import load_workbook
+import os
 
 class ParserException(Exception):
     pass
@@ -33,15 +34,36 @@ class Parser(object):
         return 'Category M Prices' in tariff_period_category_row[0]
 
     def get_parser(self):
+        filename, file_extension = os.path.splitext(self.tariff_file)
+        if file_extension == 'xlsx':
+            tariff_period_category_row = self.get_first_line_from_xlsx()
+        elif file_extension == 'csv':
+            tariff_period_category_row = self.get_first_line_from_csv()
+        else:
+            raise ParserFileNameException('Unrecognized extension: %s' % self.tariff_file)
+
+        if self.is_drug_tariff_part(tariff_period_category_row):
+            return DrugPartMParser(self.tariff_file)
+        elif self.is_category_m_prices(tariff_period_category_row):
+            return CategoryMParser(self.tariff_file)
+        else:
+            raise ParserTypeNotFoundException('File %s row: %s' & (self.tariff_file, tariff_period_category_row))
+
+    def get_first_line_from_csv(self):
         with open(self.tariff_file, 'r') as csvfile:
             csvreader = csv.reader(csvfile)
             tariff_period_category_row = next(csvreader)
-            if self.is_drug_tariff_part(tariff_period_category_row):
-                return DrugPartMParser(self.tariff_file)
-            elif self.is_category_m_prices(tariff_period_category_row):
-                return CategoryMParser(self.tariff_file)
-            else:
-                raise ParserTypeNotFoundException('File %s row: %s' & (self.tariff_file, tariff_period_category_row))
+            return tariff_period_category_row
+
+    def get_first_line_from_xlsx(self):
+        wb = load_workbook(filename=self.tariff_file, read_only=True)
+        try:
+            active_sheet = wb.active
+            rows = ([str(cell.value) if cell.value else '' for cell in row] for row in active_sheet.rows)
+            tariff_period_category_row = next(rows)
+            return tariff_period_category_row
+        finally:
+            wb._archive.close()
 
 
 class BasicParser(object):
@@ -56,9 +78,16 @@ class BasicParser(object):
             tariff_period_category_row = next(csvreader)
             return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, csvreader)
 
+    def parsexls(self):
+        wb = load_workbook(filename=self.tariff_file, read_only=True)
+        active_sheet = wb.active
+        rows = ( [str(cell.value) if cell.value else ''   for cell in row] for row in active_sheet.rows)
+        tariff_period_category_row = next(rows)
+        return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, rows)
+
     def tariff_to_json(self, tariff_period_category_row, category_period_extractor, csvreader):
         blank_line = next(csvreader)
-        empty_line = [col == '' for col in blank_line]
+        empty_line = [ not col for col in blank_line]
         if all(empty_line):
             header = self.normalize_row(next(csvreader))
             if self.is_header_valid(header):

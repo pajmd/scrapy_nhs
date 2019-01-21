@@ -66,6 +66,7 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'scrapy.pipelines.files.FilesPipeline': 10,
+   'nhs.pipelines.MongoPipeline': 20
 # 'nhs.pipelines.DoNothingPipeline': 1,
 }
 
@@ -91,3 +92,46 @@ FILES_STORE = '/home/pjmd/tmp/nhs/files'
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# MONGO
+MONGO_URI = 'mongodb://127.0.0.1:27017/'
+MONGO_DATABASE = 'nhsdb'
+VALIDATE = False
+# VALIDATION_SCHEMA = {
+#    'validator': {
+#       '$jsonSchema': {
+#          'bsonType': "object",
+#          'required': [ "category", "Formulations", "Medicine", "unit", "period", "Pack_Size", "VMPP_Snomed_Code", "Basic_Price" ],
+#          'properties': {
+#              'Medicine': {
+#                'bsonType': "string",
+#                'description': "must be a string and is required"
+#             },
+#              'Basic_Price': {
+#                'bsonType': "float",
+#                'description': "must be a float and is required"
+#             }
+#          }
+#       }
+#    }
+# }
+VALIDATION_SCHEMA =  {
+    'validator': {
+        '$jsonSchema': [
+            {'bsonType': "object"},
+            {'required': ["category", "Formulations", "Medicine", "unit", "period", "Pack_Size", "VMPP_Snomed_Code",
+                          "Basic_Price"]},
+            {'properties': {
+                'Medicine': [
+                    ('bsonType', "string"),
+                    ('description', "must be a string and is required")
+                ],
+                'Basic_Price': [
+                    ('bsonType', "float"),
+                    ('description', "must be a float and is required")
+                ]
+            }
+            }
+        ]
+    }
+}

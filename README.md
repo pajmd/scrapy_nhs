@@ -14,7 +14,7 @@ https://doc.scrapy.org/en/latest/topics/architecture.html
 ## Solr with separate zookeepers: 
 https://docs.microfocus.com/UCMDB/2018.05/ucmdb-docs/docs/eng/doc_lib/Content/admin/ConfigSolrCloud_w_ZookeeperEnsemble.htm
 
-## Core vs Collection
+## Core vs Collection: a collection is made up cores scatered across shard. If there is only one shard core = collection 
 http://makble.com/solr-core-and-collection-whats-the-difference
 
 Collections can be found under example/cloud/node1/solr/
@@ -26,7 +26,8 @@ Create collection manually http://makble.com/how-to-create-new-collection-in-sol
 https://lucene.apache.org/solr/guide/7_6/config-sets.html
 https://lucene.apache.org/solr/guide/7_6/configsets-api.html#configsets-api
 
-curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=nhsConfigSet&baseConfigSet=_default&configSetProp.immutable=false&wt=xml&omitHeader=true"
+##### It is best to base SomeConfigSet on a base ConfigSet so SomeConfigSet can be deleted at will
+curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=nhsConfigSet&baseConfigSet=SomeConfigSet&configSetProp.immutable=false&wt=xml&omitHeader=true"
 
 ## Solr fields
 https://lucene.apache.org/solr/guide/7_6/documents-fields-and-schema-design.html
@@ -60,20 +61,24 @@ specific field GET /collection/schema/fields/fieldname
 curl http://localhost:8983/solr/gettingstarted/schema/fieldtypes?wt=json
 
 ## Zookeeper - Configsets
+
 https://chakrayel.wordpress.com/2017/11/08/updating-zookeeper-configuration-files-in-solrcloud-collection/
 In SolrCloud configsets are stored under zookeeper trees structures.
 See http://localhost:8983/solr/#/~cloud?view=tree
+
 #### zkcli commands
 https://lucene.apache.org/solr/guide/7_6/command-line-utilities.html
-#### Only way to update solrconfig.xml
-Upload a Configuration Directory
-./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname my_new_config -confdir server/solr/configsets/_default/conf
+
+#### Along with MaanagedSchema a Configset contains a solrconfig.xml - A configset must be uploaded to zookeeper
+Upload a Configuration Directory. Configsets are stored in zookeeper
+./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname my_new_config -confdir server/solr/configsets/NewConfig/conf
+
 #### To check the new solrconfig.xml
 http://localhost:8983/solr/#/~cloud?view=tree
+
 ##### for the particular collection stuffy
 http://localhost:8983/solr/#/stuffy/files?file=solrconfig.xml
 
-I appears the solrconfig.xml in the collection is updated right away when the configset solrconfig.xml is uploaded.
 
 ## Solr querying
 #### field containing space

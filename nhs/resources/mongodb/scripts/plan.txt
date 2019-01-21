@@ -1,7 +1,7 @@
 # Solr
 # create a generic configset and add to solrconfig.xml
-<requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
-This request handler is used by Mongo Connector to find out the collection's fields
+# <requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+# This request handler is used by Mongo Connector to find out the collection's fields
 
 ./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname mongoConnectorBaseConfig -confdir /home/pjmd/python_workspace/PycharmProjects/scrapy_tuto/nhs/resources/solr/configsets/mongoConnectorConfig/conf
 
@@ -13,10 +13,76 @@ curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnector
 - create nhsCollection
 curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=nhsCollection&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
 
-- besides the nhs fields add to the ManagedSchema:
+- besides the nhs fields add the following fields to the ManagedSchema:
 <field name="_ts" type="long" indexed="true" stored="true" />
 <field name="ns" type="string" indexed="true" stored="true"/>
 
+curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field" : {
+    "source":"*",
+    "dest":"_text_"
+  },
+  "add-field":{
+     "name":"category",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Formulations",
+     "type":"text_general",
+     "multiValued":true,
+     "stored":true },
+  "add-field":{
+     "name":"Medicine",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"unit",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"period",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Pack_Size",
+     "type":"pfloat",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"VMPP_Snomed_Code",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Basic_Price",
+     "type":"pfloat",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Spec Cont Ind",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Special Container",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"_ts",
+     "type":"plong",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"ns",
+     "type":"string",
+     "multiValued":false,
+     "stored":true }
+}' http://localhost:8983/solr/nhsCollection/schema
 
 # mongo
 - create a db nhsdb
