@@ -1,7 +1,14 @@
-# Solr
-# create a generic configset and add to solrconfig.xml
-# <requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
-# This request handler is used by Mongo Connector to find out the collection's fields
+#             Solr
+#############################################################
+
+- start solr
+    cd ~/solr-7.6.0
+    bin/solr start -e cloud -noprompt
+
+- create a generic configset and add to solrconfig.xml
+    <requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+
+    This request handler is used by Mongo Connector to find out the collection's fields
 
 ./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname mongoConnectorBaseConfig -confdir /home/pjmd/python_workspace/PycharmProjects/scrapy_tuto/nhs/resources/solr/configsets/mongoConnectorConfig/conf
 
@@ -10,8 +17,15 @@
 
 curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
 
+- delete the nhs config
+curl "http://localhost:8983/solr/admin/configs?action=DELETE&name=mongoConnectorConfig"
+
 - create nhsCollection
 curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=nhsCollection&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
+
+- delete collection
+curl "http://localhost:8983/solr/admin/collections?action=DELETE&name=nhsCollection&wt=json"
+
 
 - besides the nhs fields add the following fields to the ManagedSchema:
 <field name="_ts" type="long" indexed="true" stored="true" />
@@ -48,17 +62,17 @@ curl -X POST -H 'Content-type:application/json' --data-binary '{
      "multiValued":false,
      "stored":true },
   "add-field":{
-     "name":"Pack_Size",
+     "name":"Pack Size",
      "type":"pfloat",
      "multiValued":false,
      "stored":true },
   "add-field":{
-     "name":"VMPP_Snomed_Code",
+     "name":"VMPP Snomed Code",
      "type":"text_general",
      "multiValued":false,
      "stored":true },
   "add-field":{
-     "name":"Basic_Price",
+     "name":"Basic Price",
      "type":"pfloat",
      "multiValued":false,
      "stored":true },
@@ -84,7 +98,31 @@ curl -X POST -H 'Content-type:application/json' --data-binary '{
      "stored":true }
 }' http://localhost:8983/solr/nhsCollection/schema
 
-# mongo
+#       mongo
+#######################################
+
+- Add replication to mongod:
+    /etc/mongod.conf
+    replication:
+        replSetName: nhsReplicaName
+
+- start mongod
+    ~/bin/start_mogo
+
 - create a db nhsdb
-- create a collection nshCollection
+    using mongo shell: use nhsdb
+
+- create a collection nshCollection (I think optional)
+    using mongo shell:
+
+- activate the replicaset: One time thing
+    mongo shell: rs.initiate()
+
+- start mongo connector
+    mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
+
+
+
+
+
 

@@ -6,9 +6,10 @@ rs.initiate()
 # mogo commands:
 # https://docs.mongodb.com/manual/reference/method/
 
-
 show dbs
 use nhsdb
+show collections
+db.nhsCollection.find().count()
 a = {
 	"category" : "Drug Tariff Part VIIIB",
 	"Formulations" : "SF, STD, LF, CF",
@@ -35,5 +36,8 @@ b = {
 	"Basic Price" : "15"
 }
 
-db.nhscollection.instert([a,b])
-db.nhscollection.find()
+db.nhsCollection.instert([a,b])
+db.nhsCollection.find()
+db.nhsCollection.drop()
+db.nhsCollection.find({"_id": ObjectId("5c4855b6c2f6c02c302a55dc")})
+db.nhsCollection.find().limit( 5 )

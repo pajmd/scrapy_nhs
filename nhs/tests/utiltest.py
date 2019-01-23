@@ -39,3 +39,5 @@ def get_bin_resource(filename, sub_path=None):
         return f.read()
 
 
+def get_listdir(filestore, folder):
+    return os.listdir("%s/%s" % (filestore, folder))

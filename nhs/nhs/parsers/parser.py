@@ -35,17 +35,17 @@ class Parser(object):
 
     def get_parser(self):
         filename, file_extension = os.path.splitext(self.tariff_file)
-        if file_extension == 'xlsx':
+        if file_extension == '.xlsx':
             tariff_period_category_row = self.get_first_line_from_xlsx()
-        elif file_extension == 'csv':
+        elif file_extension == '.csv':
             tariff_period_category_row = self.get_first_line_from_csv()
         else:
             raise ParserFileNameException('Unrecognized extension: %s' % self.tariff_file)
 
         if self.is_drug_tariff_part(tariff_period_category_row):
-            return DrugPartMParser(self.tariff_file)
+            return DrugPartMParser(self.tariff_file, file_extension)
         elif self.is_category_m_prices(tariff_period_category_row):
-            return CategoryMParser(self.tariff_file)
+            return CategoryMParser(self.tariff_file, file_extension)
         else:
             raise ParserTypeNotFoundException('File %s row: %s' & (self.tariff_file, tariff_period_category_row))
 
@@ -69,10 +69,20 @@ class Parser(object):
 class BasicParser(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, tariff_file):
+    def __init__(self, tariff_file, file_extension='.csv'):
         self.tariff_file = tariff_file
+        self.file_extension = file_extension
 
     def parse(self):
+        if self.file_extension == '.csv':
+            return self.parsecsv()
+        elif self.file_extension == '.xlsx':
+            return self.parsexls()
+        else:
+            raise ParserFileNameException('Unrecognized extension: %s' % self.tariff_file)
+
+
+    def parsecsv(self):
         with open(self.tariff_file, 'r') as csvfile:
             csvreader = csv.reader(csvfile)
             tariff_period_category_row = next(csvreader)
@@ -95,7 +105,7 @@ class BasicParser(object):
                 medicines = []
                 for line in csvreader:
                     medicine = {
-                        'id': uuid.uuid4().hex,
+#                        'id': uuid.uuid4().hex,
                         'category': category,
                         'period': period,
                     }

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pymongo
+from parsers.parser import Parser
+
 
 # Define your item pipelines here
 #
@@ -31,7 +33,7 @@ class MongoPipeline(object):
             mongo_uri=crawler.settings.get('MONGO_URI'),
             mongo_db=crawler.settings.get('MONGO_DATABASE', 'items'),
             validate=crawler.settings.get('VALIDATE'),
-            vaiadtion_schema=crawler.settings.get('VALIDATION_SCHEMA'),
+            validation_schema=crawler.settings.get('VALIDATION_SCHEMA'),
             file_store=crawler.settings.get('FILES_STORE')
         )
 
@@ -59,6 +61,16 @@ class MongoPipeline(object):
         #            'path': 'full/2e4f8f2529c3aa801b2c322f624897953445d9ea.xlsx',
         #            'url': 'https://www.nhsbsa.nhs
         for file in item['files']:
-            documents = converttojson('%s/%s' % (self.file_store, file['path']))
-            self.db[self.collection_name].insert(documents)
+            filename = file['path']
+            try:
+                documents = self.converttojson(filename)
+                rc = self.db[self.collection_name].insert_many(documents)
+            except Exception as ex:
+                print("Failed proccessing file %s - %s" % (filename, ex))
         return item
+
+    def converttojson(self, filename):
+        parser = Parser(filename, self.file_store)
+        specialized_parser = parser.get_parser()
+        json_tariff = specialized_parser.parse()
+        return json_tariff

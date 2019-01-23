@@ -1,5 +1,8 @@
 
 # Doc Scrapy and Solr Documentation:
+
+#Scarpy
+
 ## Setting up a pipeline:
 https://groups.google.com/forum/#!topic/scrapy-users/kzGHFjXywuY
 
@@ -10,6 +13,11 @@ https://doc.scrapy.org/en/latest/topics/media-pipeline.html
 
 ## scrapy architecture
 https://doc.scrapy.org/en/latest/topics/architecture.html
+
+# SOLR
+
+## Replication scheme
+https://sematext.com/blog/solr-7-new-replica-types/
 
 ## Solr with separate zookeepers: 
 https://docs.microfocus.com/UCMDB/2018.05/ucmdb-docs/docs/eng/doc_lib/Content/admin/ConfigSolrCloud_w_ZookeeperEnsemble.htm
@@ -106,6 +114,7 @@ see https://lucene.apache.org/solr/guide/7_6/configuring-solrconfig-xml.html to 
 
 
 # Mongodb
+
 #### To check th configuation on the deamon
 In mongo shell:
 db.adminCommand("getCmdLineOpts")
@@ -114,5 +123,6 @@ db.adminCommand("getCmdLineOpts")
 In mongo shell: 
 rs.initiate()
 
+#### Convert standalone server to a replicaset
 
-
+https://docs.mongodb.com/manual/tutorial/convert-standalone-to-replica-set/
