@@ -9,7 +9,6 @@ from parsers.parser import Parser
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-from scrapy.pipelines.files import FilesPipeline
 
 class DoNothingPipeline(object):
     def process_item(self, item, spider):
@@ -47,11 +46,11 @@ class MongoPipeline(object):
         if self.collection_name in self.db.collection_names():
             self.db.runCommand({
                 'collMod': self.collection_name,
-                'validator': self.vaiadtion_schema
+                'validator': self.validation_schema
             }
             )
         else:
-            self.db.createCollection(self.collection_name, **self.vaiadtion_schema)
+            self.db.createCollection(self.collection_name, **self.validation_schema)
 
     def close_spider(self, spider):
         self.client.close()

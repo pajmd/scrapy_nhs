@@ -4,7 +4,7 @@ from solrclient.solrclientexceptions import (
     DeleteCollectionException,
     AddFieldSchemaException
 )
-from nhs.tests.utiltest import get_resource, get_json_resource, get_bin_resource
+from nhs.tests.utiltest import get_resource, get_json_resource
 import pytest
 import sys
 
@@ -176,6 +176,7 @@ def test_adding_fields_to_del():
     slrclient = SolrClient(host='localhost', port=8983)
     fields = get_json_resource('nhs_field_list.json', 'json')
     slrclient.add_fields("stuffy", fields)
+
 
 def test_indexing_to_del():
     slrclient = SolrClient(host='localhost', port=8983)

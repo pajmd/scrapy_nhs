@@ -1,9 +1,9 @@
 from datastore.fs_store import FSstore
 from datastore.mongo_store import MongoStore
 from config import (
-FS,
-MONGO,
-SOURCE_DESTINATION
+    FS,
+    MONGO,
+    SOURCE_DESTINATION
 )
 
 

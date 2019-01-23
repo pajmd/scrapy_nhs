@@ -2,6 +2,7 @@ import os
 import json
 from parsers.parser import Parser, ParserException, ParserFileNameException
 
+
 class FSstore(object):
     def __init__(self, source, destination):
         self.source = source

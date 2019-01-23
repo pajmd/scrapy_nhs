@@ -1,9 +1,9 @@
 import csv
 from abc import abstractmethod, ABCMeta
-import uuid
 import config as cfg
 from openpyxl import load_workbook
 import os
+
 
 class ParserException(Exception):
     pass
@@ -19,6 +19,7 @@ class ParserTypeNotFoundException(Exception):
 
 class ParserHeaderNotValidException(Exception):
     pass
+
 
 class Parser(object):
 
@@ -47,7 +48,7 @@ class Parser(object):
         elif self.is_category_m_prices(tariff_period_category_row):
             return CategoryMParser(self.tariff_file, file_extension)
         else:
-            raise ParserTypeNotFoundException('File %s row: %s' & (self.tariff_file, tariff_period_category_row))
+            raise ParserTypeNotFoundException('File %s row: %s' % (self.tariff_file, tariff_period_category_row))
 
     def get_first_line_from_csv(self):
         with open(self.tariff_file, 'r') as csvfile:
@@ -81,7 +82,6 @@ class BasicParser(object):
         else:
             raise ParserFileNameException('Unrecognized extension: %s' % self.tariff_file)
 
-
     def parsecsv(self):
         with open(self.tariff_file, 'r') as csvfile:
             csvreader = csv.reader(csvfile)
@@ -91,13 +91,13 @@ class BasicParser(object):
     def parsexls(self):
         wb = load_workbook(filename=self.tariff_file, read_only=True)
         active_sheet = wb.active
-        rows = ( [str(cell.value) if cell.value else ''   for cell in row] for row in active_sheet.rows)
+        rows = ([str(cell.value) if cell.value else '' for cell in row] for row in active_sheet.rows)
         tariff_period_category_row = next(rows)
         return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, rows)
 
     def tariff_to_json(self, tariff_period_category_row, category_period_extractor, csvreader):
         blank_line = next(csvreader)
-        empty_line = [ not col for col in blank_line]
+        empty_line = [not col for col in blank_line]
         if all(empty_line):
             header = self.normalize_row(next(csvreader))
             if self.is_header_valid(header):
@@ -128,11 +128,11 @@ class BasicParser(object):
 
     @staticmethod
     def normalize_row(row):
-        return [ col.strip() for col in row]
+        return [col.strip() for col in row]
 
     @staticmethod
     def tolower_row(row):
-        return [ col.lower() for col in row]
+        return [col.lower() for col in row]
 
 
 class DrugPartMParser(BasicParser):

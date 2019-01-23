@@ -23,11 +23,11 @@ def test_category_m():
 
 
 def test_normalize():
-    row =['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
-    expected =['head1', 'head 2', 'head 3', 'head 4', 'head 5', 'head6', 'head7']
+    row = ['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
+    expected = ['head1', 'head 2', 'head 3', 'head 4', 'head 5', 'head6', 'head7']
     norm_row = BasicParser.normalize_row(row)
     zrow = zip(norm_row, expected)
-    truth = [i[0] == i[1] for i in zrow ]
+    truth = [i[0] == i[1] for i in zrow]
     assert all(truth)
 
 
@@ -36,6 +36,6 @@ def test_tolower_row():
     expected = ['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
     norm_row = BasicParser.tolower_row(row)
     zrow = zip(norm_row, expected)
-    truth = [i[0] == i[1] for i in zrow ]
+    truth = [i[0] == i[1] for i in zrow]
     assert all(truth)
 

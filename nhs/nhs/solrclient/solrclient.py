@@ -1,7 +1,6 @@
 from solrclient.httpclient import HttpClient
 from solrclient.solrclientexceptions import raise_for_status
 from solrclient.solrcommands import SolrOp as op
-from requests.exceptions import HTTPError
 
 
 # https://lucene.apache.org/solr/guide/7_3/collections-api.html
@@ -129,7 +128,6 @@ class SolrClient(HttpClient):
             },
         ]
         :param schema: collection name
-        :param name:
         :param fields: a list of dict of several field commands or copy field commands...
         :return:
         """

@@ -32,7 +32,7 @@ def test_get_source_destination(medium, source_destination):
 ])
 def test_get_store(medium, clazz):
     ds = get_store(medium)
-    assert  isinstance(ds, clazz)
+    assert isinstance(ds, clazz)
 
 
 @pytest.mark.parametrize("medium", [
@@ -41,9 +41,9 @@ def test_get_store(medium, clazz):
     )
 ])
 def test_store_docs(monkeypatch, medium):
-    def mock_get_source_destination(medium):
-        if medium == config.FS:
-            return ('resources/cvs', 'resources/json')
+    def mock_get_source_destination(target):
+        if target == config.FS:
+            return 'resources/cvs', 'resources/json'
 
     monkeypatch.setattr(datastore.store, 'get_source_destination', mock_get_source_destination)
     store_docs(config.FS)

@@ -8,6 +8,6 @@ class SolrOp(Enum):
     DELETE_COLLECTION = 3
     SCHEMA = 10,
     ADD_FIELD = 11,
-    INDEXING=20,
-    ADD_FILE=21
+    INDEXING = 20,
+    ADD_FILE = 21
 

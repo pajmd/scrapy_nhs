@@ -1,5 +1,4 @@
 from solrclient.solrcommands import SolrOp as op
-import json
 
 
 class CreateCollectionException(Exception):
@@ -41,8 +40,8 @@ def get_error(operation_type, operation, response):
                 if k == 'errorMessages':
                     errmsg = error[k]
                 else:
-                    op = k
-            return op, errmsg
+                    opr = k
+            return opr, errmsg
         details = response["error"]["details"]
         return "Error %s %s: %s" % (operation_type.name, *extract_error(details))
     elif operation_type == op.INDEXING:
@@ -61,15 +60,15 @@ def raise_for_status(operation_type, operation, resp):
     """
     if isinstance(resp, list):
         for r in resp:
-            inspect(operation_type, operation,r)
+            inspect(operation_type, operation, r)
     else:
-        inspect(operation_type, operation,resp)
+        inspect(operation_type, operation, resp)
 
 
 def inspect(operation_type, operation, resp):
     print("%s - %s: %s" % (operation_type.name, operation.name, resp))
     if resp.status_code != 200:
-        response =  resp.json()
+        response = resp.json()
         # response = json.loads(resp.text)
         if operation_type == op.ADMIN:
             if response["responseHeader"]["status"] != 0:
@@ -84,4 +83,4 @@ def inspect(operation_type, operation, resp):
         elif operation_type == op.INDEXING:
             if response["responseHeader"]["status"] != 0:
                 if operation == op.ADD_FILE:
-                    raise IndexingFileException(get_error(operation_type, operation,response))
+                    raise IndexingFileException(get_error(operation_type, operation, response))
