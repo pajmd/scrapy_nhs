@@ -2,7 +2,8 @@ from solrclient.solrclient import SolrClient
 from solrclient.solrclientexceptions import (
     CreateCollectionException,
     DeleteCollectionException,
-    AddFieldSchemaException
+    AddFieldSchemaException,
+    IndexingFileException
 )
 from nhs.tests.utiltest import get_resource, get_json_resource
 import pytest
@@ -21,9 +22,9 @@ def curlit(cmd):
         print("Execution failed:", e, file=sys.stderr)
 
 
-################# tearup and teardown fixtures #################
+# ################ tearup and teardown fixtures #################
 
-#### I did not use the folowing 2 the pre... fixtures because the can't accept parameters
+# ### I did not use the folowing 2 the pre... fixtures because the can't accept parameters
 
 # this fixture works fine  and does a tear up and tera down but can't receive parameters
 # so I just create 2 fixtures that can receive parameters one une as
@@ -153,13 +154,13 @@ def test_add_document_file(fixture_create_collection, fixture_delete_collection,
     }
     slrclient.add_field(collection, name='Pack Size', fieldtype="pfloat", multivalued=False, stored=True,
                         optional=options)
-
-    slrclient.add_document_files(collection, files, commit=True)
+    with pytest.raises(IndexingFileException):
+        slrclient.add_document_files(collection, files, commit=True)
     fixture_delete_collection(collection)
 
 
 @pytest.mark.parametrize("collection, files", [
-    ('stuffy', get_resource('test_drug_part_m.json', 'json')),
+    ('stuffy', get_resource('test_drug_part_m_id.json', 'json')),
     # ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
 ])
 def test_add_fields_and_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
@@ -172,30 +173,14 @@ def test_add_fields_and_document_file(fixture_create_collection, fixture_delete_
     fixture_delete_collection(collection)
 
 
-def test_adding_fields_to_del():
-    slrclient = SolrClient(host='localhost', port=8983)
-    fields = get_json_resource('nhs_field_list.json', 'json')
-    slrclient.add_fields("stuffy", fields)
-
-
-def test_indexing_to_del():
-    slrclient = SolrClient(host='localhost', port=8983)
-    slrclient.add_document_files("stuffy", [
-        get_resource('test_drug_part_m.json', 'json'),
-        get_resource('test_drug_part_m_may.json', 'json')
-    ], commit=True)
-
-
-def test_one_field_to_del():
-    slrclient = SolrClient(host='localhost', port=8983)
-    fields = [
-        {
-            "add-field": {
-                "name": "Spec Cont Ind",
-                "type": "text_general",
-                "multiValued": False,
-                "stored": True
-            }
-        }
-    ]
-    slrclient.add_fields("stuffy", fields)
+def t_est_id():
+    import json
+    file = get_resource('test_drug_part_m.json', 'json')
+    with open(file) as f:
+        l = json.load(f)
+        i = 0
+    for d in l:
+        d['id'] = i+1
+    file = get_resource('test_drug_part_m_id.json', 'json')
+    with open(file, 'w') as f:
+        json.dump(l, f)

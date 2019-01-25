@@ -18,7 +18,7 @@ mongo-connector --unique-key=id –n <db>.<collection> -m localhost:27017 -t htt
     unique key for the target system (for me solr)
 
 
-mongo-connector --unique-key=id –n nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager
+mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
 
 Resyncing the connector
 ########################

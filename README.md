@@ -1,7 +1,24 @@
+# The project
+
+## Prerequisite
+- mongodb installed
+  mongo with replicaset
+  nhsdb created
+- mongo connector installed
+- solr installed
+  nhsCollection created
+  mongodb fields added to the managed schema as well as _ts and ns field for the connector
+  
+## To run the system
+- start mongodb
+- start solr
+- start mongo connector
+- run __main__ in the scrappy app
+
 
 # Doc Scrapy and Solr Documentation:
 
-#Scarpy
+#Scrapy
 
 ## Setting up a pipeline:
 https://groups.google.com/forum/#!topic/scrapy-users/kzGHFjXywuY

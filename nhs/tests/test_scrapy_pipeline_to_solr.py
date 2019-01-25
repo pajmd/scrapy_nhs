@@ -3,7 +3,7 @@ from nhs.tests import utiltest
 import settings
 
 
-def test_feed_files_to_pipeline():
+def t_est_feed_files_to_pipeline():
     folder = 'full'
     files = utiltest.get_listdir(settings.FILES_STORE, folder)
     item = {

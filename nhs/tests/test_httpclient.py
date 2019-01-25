@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
                              ({'payload': 'stuff'}, None, None, 'SomeResponse'),
                              ({'payload': 'stuff'}, None, {'WHAT': 'header val'}, 'SomeResponse'),
                              (None, 'a_file', None, 'SomeResponse'),
-                             (None, ['file1', 'file2'], None, ['SomeResponse', 'SomeResponse']),
+                             (None, ['file1', 'file2'], None, 'SomeResponse'), # return the last response error or not
                              pytest.param(None, None, None, 'HttpClientException',
                                           marks=pytest.mark.xfail(raises=HttpClientException)),
                              pytest.param({'payload': 'stuff'}, 'a_file', None, 'HttpClientException',

@@ -1,0 +1,18 @@
+{
+  "__Comment": "To launch it: mongo-connector -c <full path>/mongo-connector-config.json",
+  "__Comment": "The oplogFile setting is defaulted to <running mongo connector>/oplog.timestamp",
+  "__comment": " --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v --auto-commit-interval=2",
+  "namespaces": {
+    "nhsdb.nhsCollection": true
+  },
+  "mainAddress": "localhost:27017",
+  "docManagers": [
+    {
+      "targetURL": "http://localhost:8983/solr/nhsCollection",
+      "docManager": "solr_doc_manager",
+      "uniqueKey": "id",
+      "autoCommitInterval": 2
+    }
+  ],
+  "verbosity": 3
+}
