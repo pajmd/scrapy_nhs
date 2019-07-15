@@ -2,17 +2,147 @@
 
 ## Prerequisite
 - mongodb installed
-  mongo with replicaset
-  nhsdb created
+  mongo with replicaset;
+  - Add replication to mongod:
+  Add to /etc/mongod.conf
+    ```
+    replication:
+        replSetName: nhsReplicaName
+    ```
+   - to initiate replication
+    In mongo shell:
+    ``` 
+    rs.initiate()
+    ```
+  - To check th configuation on the deamon.
+    In mongo shell:
+    ```
+    db.adminCommand("getCmdLineOpts")
+    ```
+
+  - nhsdb created
+    ```
+    use nshdb
+    ```
 - mongo connector installed
+    ```
+    pip intall -r requirement.txt
+    ```
 - solr installed
-  nhsCollection created
-  mongodb fields added to the managed schema as well as _ts and ns field for the connector
+    ```
+    download solr-7.n.n.tgz from the official website and unzip it in your home folder
+    ```
+-  nhsCollection created 
+    - start solr
+    ```
+    cd solr-7.n.n
+    bin/solr start -e cloud -noprompt
+    ```
+    - uploaded config to zookeeper
+    ```
+    ./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname mongoConnectorBaseConfig -confdir /home/pjmd/python_workspace/PycharmProjects/scrapy_nhs/nhs/resources/solr/configsets/mongoConnectorConfig/conf
+    ```
+    - create a configset for the collection
+    ```
+    curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
+    ```
+    - delete the nhs config
+    ```
+    curl "http://localhost:8983/solr/admin/configs?action=DELETE&name=mongoConnectorConfig"
+    ```
+    - create the collection
+    ```
+    curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=nhsCollection&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
+    ```
+    - delete
+      ```
+      curl "http://localhost:8983/solr/admin/collections?action=DELETE&name=nhsCollection&wt=json"
+      ```
+        
+    - add the mongodb fields to the collection managed schema as well as _ts and ns field for used by the connector the connector
+  ```
+  curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field" : {
+    "source":"*",
+    "dest":"_text_"
+  },
+  "add-field":{
+     "name":"category",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Formulations",
+     "type":"text_general",
+     "multiValued":true,
+     "stored":true },
+  "add-field":{
+     "name":"Medicine",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"unit",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"period",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Pack Size",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"VMPP Snomed Code",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Basic Price",
+     "type":"pfloat",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Spec Cont Ind",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"Special Container",
+     "type":"text_general",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"_ts",
+     "type":"plong",
+     "multiValued":false,
+     "stored":true },
+  "add-field":{
+     "name":"ns",
+     "type":"string",
+     "multiValued":false,
+     "stored":true }
+    }' http://localhost:8983/solr/nhsCollection/schema
+
+  ```
   
 ## To run the system
 - start mongodb
+```
+sudo service mongod start
+```
 - start solr
+```
+bin/solr start -e cloud -noprompt
+```
 - start mongo connector
+```
+mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
+```
 - run __main__ in the scrappy app
 
 

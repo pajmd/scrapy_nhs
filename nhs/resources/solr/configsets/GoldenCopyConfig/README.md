@@ -13,11 +13,11 @@ Therefore to recreate the collection one would have to copy GoldenCopyConfig to
 The _default config is schemaless which is not recommended:
 If one has add-unknown-fields-to-the-schema configured in the update processor 
 chain in solrconfig.xml, one is using schemaless mode.
-I removed this update processeur from the chain
+I removed this update processor from the chain
 
 #### The purpose of GoldenCopyConfig 
 is to have a custom soloarconfig.xml where
- the mutating field update processor is removed from the chain of update precessor
+ the mutating field update processor is removed from the chain of update processor
  
 #### command to copy the configset
 curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=testConfig&baseConfigSet=GoldenCopyConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
