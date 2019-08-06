@@ -1,0 +1,78 @@
+{
+   "add-copy-field":{
+      "source":"*",
+      "dest":"_text_"
+   },
+   "add-field":{
+      "name":"category",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Formulations",
+      "type":"text_general",
+      "multiValued":true,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Medicine",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"unit",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"period",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Pack Size",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"VMPP Snomed Code",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Basic Price",
+      "type":"pfloat",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Spec Cont Ind",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"Special Container",
+      "type":"text_general",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"_ts",
+      "type":"plong",
+      "multiValued":false,
+      "stored":true
+   },
+   "add-field":{
+      "name":"ns",
+      "type":"string",
+      "multiValued":false,
+      "stored":true
+   }
+}
