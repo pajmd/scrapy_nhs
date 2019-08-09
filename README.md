@@ -141,7 +141,7 @@ bin/solr start -e cloud -noprompt
 ```
 - start mongo connector
 ```
-mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
+mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v --auto-commit-interval=2
 ```
 - run __main__ in the scrappy app
 
@@ -224,7 +224,7 @@ See http://localhost:8983/solr/#/~cloud?view=tree
 #### zkcli commands
 https://lucene.apache.org/solr/guide/7_6/command-line-utilities.html
 
-#### Along with MaanagedSchema a Configset contains a solrconfig.xml - A configset must be uploaded to zookeeper
+#### Along with ManagedSchema a Configset contains a solrconfig.xml - A configset must be uploaded to zookeeper
 Upload a Configuration Directory. Configsets are stored in zookeeper
 ./server/scripts/cloud-scripts/zkcli.sh -zkhost 127.0.0.1:9983 -cmd upconfig -confname my_new_config -confdir server/solr/configsets/NewConfig/conf
 

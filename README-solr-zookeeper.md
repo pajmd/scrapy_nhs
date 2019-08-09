@@ -96,7 +96,7 @@ deleteall /my_solr_conf
 
 * add mongo fields:
 	```
-	curl -X POST -H 'Content-type:application/json' --data-binary @/home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/resources/mongo_fields.json  http://localhost:8983/solr/nhsCollection/schema
+	curl -X POST -H 'Content-type:application/json' --data-binary @/home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_fields/mongo_fields.json  http://localhost:8983/solr/nhsCollection/schema
 	```
 * start mongo connetcor in some temp folder  
 	Starting from a clean slate:
@@ -117,7 +117,7 @@ deleteall /my_solr_conf
 
 	```
 	~/tmp > source ../python_workspace/python-env/scrapy-nhs-env/bin/activate
-	~/tmp > mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
+	~/tmp > mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v --auto-commit-interval=2
 	```
 	* start sacrpy-nhs mongo updater
 	```
