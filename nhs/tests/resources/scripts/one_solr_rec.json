@@ -1,0 +1,10 @@
+[{
+	"id": "testid0",
+	"category" : "Drug Tariff Part VIIIA",
+	"period" : "August",
+	"Medicine" : "New Medoc 3",
+	"Pack Size" : "10",
+	"unit" : "ml",
+	"VMPP Snomed Code" : "1094111000001108",
+	"Basic Price" : "1690"
+}]
