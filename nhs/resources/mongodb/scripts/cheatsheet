@@ -36,8 +36,9 @@ b = {
 	"Basic Price" : "15"
 }
 
-db.nhsCollection.instert([a,b])
+db.nhsCollection.insert([a,b])
 db.nhsCollection.find()
 db.nhsCollection.drop()
 db.nhsCollection.find({"_id": ObjectId("5c4855b6c2f6c02c302a55dc")})
 db.nhsCollection.find().limit( 5 )
+db.nhsCollection.find({"Medicine":{$exists:true}})

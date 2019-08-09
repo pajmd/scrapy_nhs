@@ -119,7 +119,7 @@ curl -X POST -H 'Content-type:application/json' --data-binary '{
     mongo shell: rs.initiate()
 
 - start mongo connector
-    mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v
+    mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v --auto-commit-interval=2
 
 
 
