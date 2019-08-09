@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 
 
 def get_resource(filename, sub_path=None):
@@ -41,3 +42,24 @@ def get_bin_resource(filename, sub_path=None):
 
 def get_listdir(filestore, folder):
     return os.listdir("%s/%s" % (filestore, folder))
+
+
+def run_script(script, param):
+    from subprocess import run, PIPE
+    try:
+        if isinstance(param, list):
+            args = [script]
+            args.extend(param)
+            args = " ".join(args)
+            retcode = run(args, check=True, shell=True, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        else:
+            retcode = run([script, param], check=True)
+        if retcode.returncode < 0:
+            print("Child was terminated by signal", -retcode, file=sys.stderr)
+        else:
+            print("Child returned", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
+    except Exception as e:
+        print("Execution failed:", e, file=sys.stderr)
+

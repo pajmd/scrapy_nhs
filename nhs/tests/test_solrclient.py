@@ -5,22 +5,12 @@ from solrclient.solrclientexceptions import (
     AddFieldSchemaException,
     IndexingFileException
 )
-from nhs.tests.utiltest import get_resource, get_json_resource
+from nhs.tests.utiltest import get_resource, get_json_resource, run_script
 import pytest
-import sys
+import functools
 
 
-def curlit(cmd):
-    from subprocess import call
-    try:
-        retcode = call(["/usr/bin/curl", cmd])
-        if retcode < 0:
-            print("Child was terminated by signal", -retcode, file=sys.stderr)
-        else:
-            print("Child returned", retcode, file=sys.stderr)
-    except OSError as e:
-        print("Execution failed:", e, file=sys.stderr)
-
+curlit = functools.partial(run_script, "/usr/bin/curl")
 
 # ################ tearup and teardown fixtures #################
 
@@ -141,10 +131,10 @@ def test_add_field(fixture_create_collection, fixture_delete_collection):
 
 
 @pytest.mark.parametrize("collection, files", [
-    ('stuffy', get_resource('test_drug_part_m.json', 'json')),
+    ('stuffy', get_resource('test_drug_part_m_id.json', 'json')),
     # ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
 ])
-def test_add_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
+def test_add_document_file(upload_golden_copy_test_config, fixture_create_collection, fixture_delete_collection, collection, files):
     fixture_create_collection(collection)
     slrclient = SolrClient(host='localhost', port=8983)
     options = {
@@ -160,7 +150,7 @@ def test_add_document_file(fixture_create_collection, fixture_delete_collection,
 
 
 @pytest.mark.parametrize("collection, files", [
-    ('stuffy', get_resource('test_drug_part_m_id.json', 'json')),
+    ('stuffy', get_resource('test_drug_part_m_ids.json', 'json')),
     # ('stuffy', [get_resource('test_drug_part_m.json', 'json'), get_resource('test_drug_part_m.json', 'json')])
 ])
 def test_add_fields_and_document_file(fixture_create_collection, fixture_delete_collection, collection, files):
@@ -178,9 +168,8 @@ def t_est_id():
     file = get_resource('test_drug_part_m.json', 'json')
     with open(file) as f:
         l = json.load(f)
-        i = 0
-    for d in l:
-        d['id'] = i+1
-    file = get_resource('test_drug_part_m_id.json', 'json')
+    for k, d in enumerate(l, 1):
+        d['id'] = k
+    file = get_resource('test_drug_part_m_ids.json', 'json')
     with open(file, 'w') as f:
         json.dump(l, f)
