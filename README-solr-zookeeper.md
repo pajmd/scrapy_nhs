@@ -1,10 +1,11 @@
 ## Zookeeper
 
 Downloaded apache-zookeeper-3.5.5-bin.tgz and unpacked it as
-$HOME/apache-zookeeper-3.5.5-bin
+$HOME/apache-zookeeper-3.5.5-bin  
+
 
 #### config for  n=1-3 zookeper
-* created 3 conf/zoo-n.cfg
+* created 3 conf/zoo-n.cfg see https://github.com/pajmd/zookeeper
 * /var/lib/zookeeper/data-n/myid
 ##### Example of zoo-1.cfg
 ```
@@ -36,6 +37,7 @@ bin$ ./zoo-ensemble.sh stop
 The followong commands must be whitelisted: see 4lw.commands.whitelist described in cluster configuration section. This commands will be deprecated.
 * ```echo stat | nc localhost 2181 or ./zkServer.sh status```
 * ```echo mntr | nc localhost 2181```  
+
 * Instead use AdminServer (default port 8080)
 ```
 http://localhost:808[1-3]/commands/stat
@@ -51,6 +53,18 @@ bin/zkCli.sh -server "localhost:2181,localhost:2182,localhost:2183"
 
 ### Back to solr
 
+#### Solr Home
+Solr home is important because it is the fall back solr uses to find solr.xml.  
+Without solr.xml solr won't start properly
+```
+export SOLR_HOME=/home/pjmd/solr-7.7.2/server/solr
+```
+But when starting several instances of solr on the same host it is better not to set it and use the 
+-s some_home_dir option: 
+```
+solr start -c -s some_home_dir ....
+```
+
 #### Chroot: Znode
 Create a chroot (folder hierarchy) i.e. config location dedicated to solr vs other possible apps
 from solr folder:
@@ -65,61 +79,76 @@ Connecting to localhost:2181,localhost:2182,localhost:2183
 deleteall /my_solr_conf
 ```
 
-* Upload config
-	* If solr was installed using the service installation script bin/install_solr_service.sh, add variable ZK_HOST to the inlude file: /etc/default/solr.in
-	* else add it to bin/solr.in.sh
+#### Copy solr.xml to zookeeper
+solr.xml must be copied to zookeeper before solr is started  
+to do so:
+```
+bin/solr cp file:local/file/path/to/solr.xml zk:/znode/solr.xml -z localhost:2181...
+```
+
+#### Upload config
+
+* If solr was installed using the service installation script bin/install_solr_service.sh, add variable ZK_HOST to the inlude file: /etc/default/solr.in
+* else add it to bin/solr.in.sh
 	```
 	ZK_HOST=localhost:2181,localhost:2182,localhost:2183/my_solr_conf
 	```
-	* upload (without zk_HOST set in solr.in.sh)
+* upload (without zk_HOST set in solr.in.sh)
 	```
 	./server/scripts/cloud-scripts/zkcli.sh -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf -cmd upconfig -confname mongoConnectorBaseConfig -confdir /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/configsets/mongoConnectorConfig/conf
 	```
-* to start 2 solr instances pointing to solr's znode, in solrCloud mode without ZH_HOST defined in solr.in.sh
-	```
-	./solr start -c -p 8983 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf && ./solr start -c -p 7574 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf
-	```
-	<span style="background-color: #FFFF00">
-	<mark>If you see a message like: number of file open max 4096 change it to 65000  
-	see ttps://docs.oracle.com/cd/E19623-01/820-6168/file-descriptor-requirements.html
-	to fix it.</mark>
-	</span>
 
-* create the configset
-	```
+#### Start 2 solr instances pointing to solr's znode, in solrCloud mode without ZH_HOST defined in solr.in.sh
+	
+For each instance of solr we specify -s some_home_dir. It allows each instance of solr to start
+	with its own solr.xm. These home dirs will also host the conf files and indexes when the collections are created.  
+
+-s some_home_dir supersedes the env variable $SOLR_HOME (better to set it)  
+
+```
+	.bin/solr start -c -p 8983 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_config/node1 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf && bin/solr start -c -p 7574 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_config/node2 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf	 
+```
+<span style="background-color: #FFFF00">
+<mark>If you see a message like: number of file open max 4096 change it to 65000  
+see https://docs.oracle.com/cd/E19623-01/820-6168/file-descriptor-requirements.html
+to fix it.</mark>
+</span>
+
+#### create the configset
+```
 	curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
-	```
-* create the collection
-	```
+```
+#### create the collection
+```
 	curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=nhsCollection&collection.configName=mongoConnectorConfig&numShards=2&replicationFactor=2&maxShardsPerNode=2&wt=json"
-	```
+```
 
-* add mongo fields:
-	```
+#### add mongo fields:
+```
 	curl -X POST -H 'Content-type:application/json' --data-binary @/home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_fields/mongo_fields.json  http://localhost:8983/solr/nhsCollection/schema
-	```
-* start mongo connetcor in some temp folder  
+```
+#### start mongo connetcor in some temp folder  
 	Starting from a clean slate:
-	* delete the mongo connetor timestamp
-	```
+* delete the mongo connetor timestamp
+```
 	rm oplog.timestamp
-	```
-	* in mongodb clear the nhsCollection
-	```
+```
+* in mongodb clear the nhsCollection
+```
 	$ > mongo
 
 	used nhsdb
 	db.nhsCollection.count()
 	db.nhsCollection.drop()
-	```
+```
 
-	* start mongoconnector
+* start mongoconnector
 
-	```
+```
 	~/tmp > source ../python_workspace/python-env/scrapy-nhs-env/bin/activate
 	~/tmp > mongo-connector --unique-key=id --namespace-set=nhsdb.nhsCollection -m localhost:27017 -t http://localhost:8983/solr/nhsCollection -d solr_doc_manager -v --auto-commit-interval=2
-	```
-	* start sacrpy-nhs mongo updater
-	```
+```
+* start sacrpy-nhs mongo updater
+```
 	python /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/nhs/__main__.py
-	```
+```
