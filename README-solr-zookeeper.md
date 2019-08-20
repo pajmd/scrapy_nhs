@@ -1,5 +1,16 @@
 ## Zookeeper
 
+Note:  
+We I started working with solr in scrapy-nhs I used one of the already solr built in example, the cloud example
+solr -e cloud -noprompt. 
+It is all good while testing but when it comes to docker starting solr with an example will run it in the 
+background and the container will stop gracefully (exit 0).  
+For the container to stay alive the app as to run in the foreground. Unfortunately a solr example can't run
+in the foreground even when forced solr -f -e.
+For this reason I looked at running my own instances of zookeeper.  
+
+The following instructions will help running this app with solr in cloud mode along with zookeeper.
+
 Downloaded apache-zookeeper-3.5.5-bin.tgz and unpacked it as
 $HOME/apache-zookeeper-3.5.5-bin  
 
@@ -7,6 +18,7 @@ $HOME/apache-zookeeper-3.5.5-bin
 #### config for  n=1-3 zookeper
 * created 3 conf/zoo-n.cfg see https://github.com/pajmd/zookeeper
 * /var/lib/zookeeper/data-n/myid
+
 ##### Example of zoo-1.cfg
 ```
 tickTime=2000
@@ -46,9 +58,13 @@ see zoo-n.cfg to check how the jetty port is set.
 Problem with ```zkServer.sh status```  I am not sure how to give it a specif zoo.cfg file
 
 #### Zookeeper client interface
-Tp start the client and have it connect to all instances:
+To start the client and have it connect to all instances:
 ```
 bin/zkCli.sh -server "localhost:2181,localhost:2182,localhost:2183"
+```
+One can enter commands like: 
+```
+ls -R /
 ```
 
 ### Back to solr
@@ -106,7 +122,7 @@ For each instance of solr we specify -s some_home_dir. It allows each instance o
 -s some_home_dir supersedes the env variable $SOLR_HOME (better to set it)  
 
 ```
-	.bin/solr start -c -p 8983 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_config/node1 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf && bin/solr start -c -p 7574 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_config/node2 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf	 
+	.bin/solr start -c -p 8983 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_homes/node1 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf && bin/solr start -c -p 7574 -s /home/pjmd/python_workspace/PychramProjects/scrapy_nhs/nhs/resources/solr/solr_homes/node2 -z localhost:2181,localhost:2182,localhost:2183/my_solr_conf	 
 ```
 <span style="background-color: #FFFF00">
 <mark>If you see a message like: number of file open max 4096 change it to 65000  
@@ -114,7 +130,8 @@ see https://docs.oracle.com/cd/E19623-01/820-6168/file-descriptor-requirements.h
 to fix it.</mark>
 </span>
 
-#### create the configset
+#### copy the configset 
+We duplicate it to a new name to ease the process when deleting the collection and recreate it because the config contains the schema and the schema is delete when the collection is removed.
 ```
 	curl "http://localhost:8983/solr/admin/configs?action=CREATE&name=mongoConnectorConfig&baseConfigSet=mongoConnectorBaseConfig&configSetProp.immutable=false&wt=json&omitHeader=true"
 ```
@@ -142,7 +159,7 @@ to fix it.</mark>
 	db.nhsCollection.drop()
 ```
 
-* start mongoconnector
+* start mongoconnector (virtual env scrapy_nhs)
 
 ```
 	~/tmp > source ../python_workspace/python-env/scrapy-nhs-env/bin/activate
