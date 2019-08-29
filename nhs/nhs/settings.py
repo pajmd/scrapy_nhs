@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 # Scrapy settings for nhs project
 #
@@ -70,7 +71,7 @@ ITEM_PIPELINES = {
 # 'nhs.pipelines.DoNothingPipeline': 1,
 }
 
-FILES_STORE = '/home/pjmd/tmp/nhs/files'
+FILES_STORE = os.environ.get('FILES_STORE', '/home/pjmd/tmp/nhs/files')
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -94,7 +95,7 @@ FILES_STORE = '/home/pjmd/tmp/nhs/files'
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # MONGO
-MONGO_URI = 'mongodb://127.0.0.1:27017/'
+MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://127.0.0.1:27017/')
 MONGO_DATABASE = 'nhsdb'
 VALIDATE = False
 # VALIDATION_SCHEMA = {
