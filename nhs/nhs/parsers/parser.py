@@ -99,7 +99,8 @@ class BasicParser(object):
         blank_line = next(csvreader)
         empty_line = [not col for col in blank_line]
         if all(empty_line):
-            header = self.normalize_row(next(csvreader))
+            raw_header = self.normalize_row(next(csvreader))
+            header = self.normalize_header(raw_header)
             if self.is_header_valid(header):
                 category, period = category_period_extractor(tariff_period_category_row)
                 medicines = []
@@ -129,6 +130,24 @@ class BasicParser(object):
     @staticmethod
     def normalize_row(row):
         return [col.strip() for col in row]
+
+    @staticmethod
+    def normalize_header(raw_header):
+        norm = {
+            "Drug Name": "Medicine",
+            "Pack size": "Pack Size",
+            "Spec Cont Ind": "Special Container",
+            "Special container": "Special Container",
+            "Special container indicator": "Special Container"
+        }
+        normalized_header = []
+        for i, h in enumerate(raw_header):
+            if h in norm:
+                normalized_header.append(norm[h])
+            else:
+                normalized_header.append(h)
+        return normalized_header
+
 
     @staticmethod
     def tolower_row(row):

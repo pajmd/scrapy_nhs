@@ -23,6 +23,15 @@ def test_category_m():
     assert json_tariff
 
 
+def test_spec_cont_ind():
+    drug_tariff_part_filename = 'fefcbdfb389246e25f2d0e646df0677610d472fb.xlsx'
+    parser = Parser(drug_tariff_part_filename, utiltest.get_resource('', 'cvs'))
+    specialized_parser = parser.get_parser()
+    json_tariff = specialized_parser.parse()
+    print(json_tariff)
+    assert json_tariff
+
+
 def test_normalize():
     row = ['head1', 'head 2', ' head 3', 'head 4 ', ' head 5 ', 'head6 ', ' head7']
     expected = ['head1', 'head 2', 'head 3', 'head 4', 'head 5', 'head6', 'head7']
