@@ -42,3 +42,39 @@ db.nhsCollection.drop()
 db.nhsCollection.find({"_id": ObjectId("5c4855b6c2f6c02c302a55dc")})
 db.nhsCollection.find().limit( 5 )
 db.nhsCollection.find({"Medicine":{$exists:true}})
+
+db.nhsCollection.find({'_id': ObjectId('5d6cf721fd7e80fcdecd95c0')} ).forEach(function(doc) { print(doc.digest.hex())} )
+
+Querying BinData
+----------------
+"QAPKlBiBX+oJdQZC5xH4PxDjrxW7Uc50fQIjbGtBOoU=" is what mongo shows which is b64 encoded data
+ex: {"digest" : BinData(0,"QAPKlBiBX+oJdQZC5xH4PxDjrxW7Uc50fQIjbGtBOoU=")}
+it needs to be decoded (binary data) to be queried
+h = base64.b64decode(b"QAPKlBiBX+oJdQZC5xH4PxDjrxW7Uc50fQIjbGtBOoU=")
+== side note we could create binary data with type bson.binary.Binary from a byte array encoded b64
+b64 = base64.b64encode(b'@\x03\xca\x94\x18\x81_\xea\tu\x06B\xe7\x11\xf8?\x10\xe3\xaf\x15\xbbQ\xcet}\x02#lkA:\x85')
+bi = Binary(b64)
+==================================================================================================================
+    doc = result = db['nhsCollection'].find_one({"digest": h})
+    result = db['nhsCollection'].update_many({"digest": b'@\x03\xca\x94\x18\x81_\xea\tu\x06B\xe7\x11\xf8?\x10\xe3\xaf\x15\xbbQ\xcet}\x02#lkA:\x85'},
+                                         {"$set": {"dupes": [{'filename': "some file", "url": "http//someurl"}]}})
+
+To find some binary field BinData must be initialize with some b64 encoded data, there the bynary data that
+pymongo would return needs to be b64 encoded
+b64 = base64.b64encode(b"\x87\xe2\x9e\xdfCFk\xfd'E\xc6\xd6T\xee^E\xb1?\xa5e1\x1a\xfec\xd12\xffm\xb6\xf0\xf5\x8e")
+b64 == 'h+Ke30NGa/0nRcbWVO5eRbE/pWUxGv5j0TL/bbbw9Y4='
+db.nhsCollection.find({"digest": BinData(0,'h+Ke30NGa/0nRcbWVO5eRbE/pWUxGv5j0TL/bbbw9Y4=')})
+
+
+Find field not null
+-------------------
+db.mycollection.find({"IMAGE URL":{$exists:true}});
+
+
+Print some bson object:
+------------------------
+db.nhsCollection.find({"dupes": {$exists:true}}).forEach(function(doc) {print(doc.filename); printjson(doc.dupes);})
+
+find elt of array field:
+-----------------------
+db.nhsCollection.find({'dupes': [{"url" : "https://www.nhsbsa.nhs", "filename" : "full/2f307d3971227f3eaafcf9a6d5b7ca5b923be172.xlsx"}]})

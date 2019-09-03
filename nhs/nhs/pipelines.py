@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pymongo
-from parsers.parser import Parser
+import base64
+from parsers.parser import Parser, BasicParser
 
 
 # Define your item pipelines here
@@ -41,6 +42,7 @@ class MongoPipeline(object):
         self.db = self.client[self.mongo_db]
         if self.validate:
             self.apply_validation()
+        self.create_index("digest")
 
     def apply_validation(self):
         if self.collection_name in self.db.collection_names():
@@ -62,14 +64,69 @@ class MongoPipeline(object):
         for file in item['files']:
             filename = file['path']
             try:
-                documents = self.converttojson(filename)
-                rc = self.db[self.collection_name].insert_many(documents)
+                documents = self.converttojson(file)
+                # rc = self.db[self.collection_name].insert_many(documents)
+                operations = self.build_bulk_upsert(documents)
+                print("Number of records to upsert: %d" % len(operations))
+                rc = self.db[self.collection_name].bulk_write(operations)
             except Exception as ex:
                 print("Failed proccessing file %s - %s" % (filename, ex))
         return item
 
-    def converttojson(self, filename):
+    def converttojson(self, file):
+        filename = file['path']
         parser = Parser(filename, self.file_store)
         specialized_parser = parser.get_parser()
-        json_tariff = specialized_parser.parse()
+        json_tariff = specialized_parser.parse(file)
         return json_tariff
+
+    def build_bulk_upsert(self, documents):
+        # UpdateOne({"field1": 11}, {"$set": {"field2": 12, "field3": 13 }}, upsert=True),
+        operations = []
+        for document in documents:
+            mutating_document = document.copy()
+            digest = mutating_document.pop("digest")
+            if not self.mark_duplicate_document(document):
+                operations.append(pymongo.UpdateOne({"digest": digest}, {"$set": mutating_document}, upsert=True))
+        return operations
+
+    def create_index(self, key):
+        index_list = self.db[self.collection_name].list_indexes()
+        truth = [index["key"].get(key) is None for index in index_list]
+        if all(truth):
+            self.db[self.collection_name].create_index(key)
+            return True
+        return False
+
+    def mark_duplicate_document(self, document):
+        digest = document['digest']
+        b64digest = base64.b64encode(digest)
+        docs = self.db[self.collection_name].find({"digest": digest})
+        if docs.count():
+            for doc in docs:
+                if document['filename'] == 'full/2f307d3971227f3eaafcf9a6d5b7ca5b923be172.xlsx':
+                    print('stop')
+                if document['filename'] == doc['filename']:
+                    print('there is a problem')
+
+            file = {
+                'url': document['url'],
+                'filename': document['filename']
+            }
+            rc = self.db[self.collection_name].update_many(
+                {"digest": digest},
+                {"$push": {"dupes": file}})
+            return True
+        return False
+        # docs = self.db[self.collection_name].find({"digest": digest})
+        # if docs:
+        #     digests = []
+        #     for doc in docs:
+        #         vals = []
+        #         for k, v in doc.items():
+        #             if k not in ["_id", "digest", 'filename', 'url']:
+        #                 vals.append(v)
+        #         actual = BasicParser.get_digest(vals)
+        #         digests.append(actual)
+        #         print(digests)
+

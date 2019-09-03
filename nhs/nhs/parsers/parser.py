@@ -3,6 +3,7 @@ from abc import abstractmethod, ABCMeta
 import config as cfg
 from openpyxl import load_workbook
 import os
+import hashlib
 
 
 class ParserException(Exception):
@@ -74,28 +75,28 @@ class BasicParser(object):
         self.tariff_file = tariff_file
         self.file_extension = file_extension
 
-    def parse(self):
+    def parse(self, file):
         if self.file_extension == '.csv':
-            return self.parsecsv()
+            return self.parsecsv(file)
         elif self.file_extension == '.xlsx':
-            return self.parsexls()
+            return self.parsexls(file)
         else:
             raise ParserFileNameException('Unrecognized extension: %s' % self.tariff_file)
 
-    def parsecsv(self):
+    def parsecsv(self, file):
         with open(self.tariff_file, 'r') as csvfile:
             csvreader = csv.reader(csvfile)
             tariff_period_category_row = next(csvreader)
-            return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, csvreader)
+            return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, csvreader, file)
 
-    def parsexls(self):
+    def parsexls(self, file):
         wb = load_workbook(filename=self.tariff_file, read_only=True)
         active_sheet = wb.active
         rows = ([str(cell.value) if cell.value else '' for cell in row] for row in active_sheet.rows)
         tariff_period_category_row = next(rows)
-        return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, rows)
+        return self.tariff_to_json(tariff_period_category_row, self.get_category_period_extractor, rows, file)
 
-    def tariff_to_json(self, tariff_period_category_row, category_period_extractor, csvreader):
+    def tariff_to_json(self, tariff_period_category_row, category_period_extractor, csvreader, file):
         blank_line = next(csvreader)
         empty_line = [not col for col in blank_line]
         if all(empty_line):
@@ -109,9 +110,13 @@ class BasicParser(object):
 #                        'id': uuid.uuid4().hex,
                         'category': category,
                         'period': period,
+                        'url': file['url'],
+                        'filename': file['path']
                     }
                     line = self.normalize_row(line)
                     medicine.update({head if head else 'unit': val for head, val in zip(header, line)})
+                    digest = self.get_digest(medicine)
+                    medicine['digest'] = digest
                     medicines.append(medicine)
                 return medicines
             else:
@@ -140,14 +145,23 @@ class BasicParser(object):
             "Special container": "Special Container",
             "Special container indicator": "Special Container"
         }
-        normalized_header = []
-        for i, h in enumerate(raw_header):
-            if h in norm:
-                normalized_header.append(norm[h])
-            else:
-                normalized_header.append(h)
+        normalized_header = [norm.get(h, h) for h in raw_header]
         return normalized_header
 
+    @staticmethod
+    def get_digest(doc):
+        vals = [v for k, v in doc.items() if k not in ["_id", "digest", 'filename', 'url', 'dupes']]
+        s_vals = "".join(vals)
+        b_vals = bytearray(s_vals, "utf-8")
+        algo = hashlib.sha3_256()
+        algo.update(b_vals)
+        digest = algo.digest()
+        return digest
+
+    @staticmethod
+    def digest_header(header):
+        header.append('digest')
+        return header
 
     @staticmethod
     def tolower_row(row):

@@ -3,11 +3,11 @@ from nhs.tests import utiltest
 import settings
 
 
-def t_est_feed_files_to_pipeline():
+def test_feed_files_to_pipeline():
     folder = 'full'
     files = utiltest.get_listdir(settings.FILES_STORE, folder)
     item = {
-        'files': [{'path': 'full/%s' % file} for file in files]
+        'files': [{'path': 'full/%s' % file, 'url': 'https://www.nhsbsa.nhs'} for file in files]
     }
     mongo_pipeline = MongoPipeline(settings.MONGO_URI, settings.MONGO_DATABASE, settings.FILES_STORE,
                                    validate=None, validation_schema=None)
