@@ -1,0 +1,30 @@
+{
+  "Drug Name": "Medicine",
+  "Pack size": "Pack Size",
+  "Spec Cont Ind": "Special Container",
+  "Special container": "Special Container",
+  "Special container indicator": "Special Container",
+  "__comments": [
+    "Formulations is  multi fields and is not in solr yet" ,
+    "Spec Cont Ind doesn't show in solr and should be normalized"
+    ],
+  "list": [
+    "Basic Price",
+    "Drug Name",
+    "Drug Tariff Category",
+    "Formulations",
+    "Medicine",
+    "Pack Size",
+    "Pack size",
+    "Price category",
+    "Spec Cont Ind",
+    "Special Container",
+    "Special container",
+    "Special container indicator",
+    "VMPP Snomed Code",
+    "_id",
+    "category",
+    "period",
+    "unit"
+  ]
+}
