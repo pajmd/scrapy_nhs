@@ -18,7 +18,14 @@ check_mongod_up() {
 			echo "Waiting for mongodb://$mongo_hostname:27017 another " $attempts_left " times"
 			sleep 5
 		else
-			break
+			replicaset=`/usr/bin/mongo "mongodb://$mongo_hostname:27017" --eval "rs.status()" | grep   "nhsReplicaName"`
+			echo "The replica set: $replicaset"
+			if [ -z "$replicaset" ]; then
+				echo "Waiting for Mongo another " $attempts_left " times"
+				sleep 5
+			else
+				break
+			fi
 		fi
 	done
 	echo "$mongo_hostname is running!"

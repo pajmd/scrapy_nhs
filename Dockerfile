@@ -12,8 +12,8 @@ COPY nhs/scrapy.cfg /app/nhs
 COPY docker_start_scrapy_nhs.sh /app
 COPY nhs/requirements.txt /app
 
-RUN echo $(ls -1R .)
-RUN apt-get install -y vim
+# RUN echo $(ls -1R .)
+# RUN apt-get install -y vim
 
 RUN mkdir -p /app/nhs_files
 ENV FILES_STORE="/app/nhs_files"
