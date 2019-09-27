@@ -66,9 +66,10 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'scrapy.pipelines.files.FilesPipeline': 10,
-   'nhs.pipelines.MongoPipeline': 20
-# 'nhs.pipelines.DoNothingPipeline': 1,
+    'scrapy.pipelines.files.FilesPipeline': 10,
+#    'nhs.pipelines.MongoPipeline': 20,
+    'nhs.pipelines.KafkaPipeline': 15
+    # 'nhs.pipelines.DoNothingPipeline': 1,
 }
 
 FILES_STORE = os.environ.get('FILES_STORE', '/home/pjmd/tmp/nhs/files')
@@ -98,6 +99,10 @@ FILES_STORE = os.environ.get('FILES_STORE', '/home/pjmd/tmp/nhs/files')
 MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://127.0.0.1:27017/')
 MONGO_DATABASE = 'nhsdb'
 VALIDATE = False
+# KAFKA
+KAFKA_HOST = 'localhost'
+KAFKA_PORT = 9092
+TOPIC = 'scrapypipe'
 # VALIDATION_SCHEMA = {
 #    'validator': {
 #       '$jsonSchema': {

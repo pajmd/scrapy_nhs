@@ -4,6 +4,7 @@ import config as cfg
 from openpyxl import load_workbook
 import os
 import hashlib
+import base64
 
 
 class ParserException(Exception):
@@ -116,7 +117,7 @@ class BasicParser(object):
                     line = self.normalize_row(line)
                     medicine.update({head if head else 'unit': val for head, val in zip(header, line)})
                     digest = self.get_digest(medicine)
-                    medicine['digest'] = digest
+                    medicine['digest'] = digest.decode('utf-8')
                     medicines.append(medicine)
                 return medicines
             else:
@@ -156,7 +157,7 @@ class BasicParser(object):
         algo = hashlib.sha3_256()
         algo.update(b_vals)
         digest = algo.digest()
-        return digest
+        return base64.b64encode(digest)
 
     @staticmethod
     def digest_header(header):

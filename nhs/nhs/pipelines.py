@@ -3,6 +3,7 @@
 import pymongo
 import base64
 from parsers.parser import Parser, BasicParser
+from document_sender.sender import MessageProducer
 
 
 # Define your item pipelines here
@@ -129,4 +130,52 @@ class MongoPipeline(object):
         #         actual = BasicParser.get_digest(vals)
         #         digests.append(actual)
         #         print(digests)
+
+
+
+class KafkaPipeline(object):
+
+    def __init__(self, kafka_host, kafka_port, topic, file_store):
+        self.kafka_host = kafka_host
+        self.kafka_port = kafka_port
+        self.topic = topic
+        self.file_store = file_store
+
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            kafka_host=crawler.settings.get('KAFKA_HOST'),
+            kafka_port=crawler.settings.get('KAFKA_PORT'),
+            topic=crawler.settings.get('TOPIC'),
+            file_store=crawler.settings.get('FILE_STORE')
+        )
+
+    def open_spider(self, spider):
+        pass
+
+    def close_spider(self, spider):
+        pass
+
+    def process_item(self, item, spider):
+        # 'files': [{'checksum': 'b619650372822a8362ff182728a0c6cd',
+        #            'path': 'full/2e4f8f2529c3aa801b2c322f624897953445d9ea.xlsx',
+        #            'url': 'https://www.nhsbsa.nhs
+        # producer = MessageProducer(self.kafka_host, self.kafka_port, self.topic)
+        for file in item['files']:
+            filename = file['path']
+            try:
+                documents = self.converttojson(file)
+                with MessageProducer(self.kafka_host, self.kafka_port, self.topic) as producer:
+                    producer.send(documents)
+            except Exception as ex:
+                print("Failed proccessing file %s - %s" % (filename, ex))
+        return item
+
+    def converttojson(self, file):
+        filename = file['path']
+        parser = Parser(filename, self.file_store)
+        specialized_parser = parser.get_parser()
+        json_tariff = specialized_parser.parse(file)
+        return json_tariff
 
