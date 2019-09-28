@@ -144,7 +144,8 @@ class BasicParser(object):
             "Pack size": "Pack Size",
             "Spec Cont Ind": "Special Container",
             "Special container": "Special Container",
-            "Special container indicator": "Special Container"
+            "Special container indicator": "Special Container",
+            "Drug Tariff Category": "category"
         }
         normalized_header = [norm.get(h, h) for h in raw_header]
         return normalized_header
