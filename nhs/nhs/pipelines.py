@@ -4,6 +4,10 @@ import pymongo
 import base64
 from parsers.parser import Parser, BasicParser
 from document_sender.sender import MessageProducer
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 # Define your item pipelines here
@@ -68,10 +72,10 @@ class MongoPipeline(object):
                 documents = self.converttojson(file)
                 # rc = self.db[self.collection_name].insert_many(documents)
                 operations = self.build_bulk_upsert(documents)
-                print("Number of records to upsert: %d" % len(operations))
+                logger.debug("Number of records to upsert: %d" % len(operations))
                 rc = self.db[self.collection_name].bulk_write(operations)
             except Exception as ex:
-                print("Failed proccessing file %s - %s" % (filename, ex))
+                logger.debug("Failed proccessing file %s - %s" % (filename, ex))
         return item
 
     def converttojson(self, file):
@@ -106,9 +110,9 @@ class MongoPipeline(object):
         if docs.count():
             for doc in docs:
                 if document['filename'] == 'full/2f307d3971227f3eaafcf9a6d5b7ca5b923be172.xlsx':
-                    print('stop')
+                    logger.debug('stop')
                 if document['filename'] == doc['filename']:
-                    print('there is a problem')
+                    logger.debug('there is a problem')
 
             file = {
                 'url': document['url'],
@@ -129,7 +133,7 @@ class MongoPipeline(object):
         #                 vals.append(v)
         #         actual = BasicParser.get_digest(vals)
         #         digests.append(actual)
-        #         print(digests)
+        #         logger.debug(digests)
 
 
 
@@ -169,7 +173,7 @@ class KafkaPipeline(object):
                 with MessageProducer(self.kafka_host, self.kafka_port, self.topic) as producer:
                     producer.send(documents)
             except Exception as ex:
-                print("Failed proccessing file %s - %s" % (filename, ex))
+                logger.debug("Failed proccessing file %s - %s" % (filename, ex))
         return item
 
     def converttojson(self, file):

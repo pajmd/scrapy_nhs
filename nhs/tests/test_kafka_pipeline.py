@@ -1,5 +1,5 @@
 from pipelines import KafkaPipeline
-from nhs.tests import utiltest
+from . import utiltest
 import settings
 
 

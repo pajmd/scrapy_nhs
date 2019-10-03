@@ -4,7 +4,7 @@
 
 import pytest
 import os
-from nhs.tests.utiltest import run_script
+from .utiltest import run_script
 
 
 # scope should be module

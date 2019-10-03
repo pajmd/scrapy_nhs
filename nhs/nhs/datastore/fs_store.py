@@ -1,6 +1,10 @@
 import os
 import json
 from parsers.parser import Parser, ParserException, ParserFileNameException
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class FSstore(object):
@@ -19,9 +23,9 @@ class FSstore(object):
                 with(open("%s/%s" % (self.destination, self.get_json_name(cvs_file)), "w+")) as f:
                     json.dump(json_tariff, f)
             except ParserException as ex:
-                print('Failed %s: %s' % (cvs_file, ex))
+                logger.debug('Failed %s: %s' % (cvs_file, ex))
             except Exception as ex:
-                print('WTF %s: %s' % (cvs_file, ex))
+                logger.debug('WTF %s: %s' % (cvs_file, ex))
 
     @staticmethod
     def get_json_name(csv_file):

@@ -273,3 +273,7 @@ rs.initiate()
 #### Convert standalone server to a replicaset
 
 https://docs.mongodb.com/manual/tutorial/convert-standalone-to-replica-set/
+
+
+#### Testing without scraping the files
+python -m pytest /home/pjmd/python_workspace/PycharmProjects/scrapy_nhs/nhs/tests/test_kafka_pipeline.py
