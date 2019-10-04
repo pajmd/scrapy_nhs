@@ -100,8 +100,8 @@ MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://127.0.0.1:27017/')
 MONGO_DATABASE = 'nhsdb'
 VALIDATE = False
 # KAFKA
-KAFKA_HOST = 'localhost'
-KAFKA_PORT = 9092
+KAFKA_HOST = os.environ.get('KAFKA_HOST', 'localhost')
+KAFKA_PORT = os.environ.get('KAFKA_PORT', 9092)
 TOPIC = 'scrapypipe'
 # VALIDATION_SCHEMA = {
 #    'validator': {

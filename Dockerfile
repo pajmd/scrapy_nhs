@@ -11,11 +11,17 @@ COPY nhs/nhs /app/nhs/nhs
 COPY nhs/scrapy.cfg /app/nhs
 COPY docker_start_scrapy_nhs.sh /app
 COPY nhs/requirements.txt /app
-
-# RUN echo $(ls -1R .)
+RUN mkdir -p  /app/nhs/tests
+COPY nhs/tests/test_kafka_pipeline.py /app/nhs/tests
+COPY nhs/tests/utiltest.py /app/nhs/tests
+COPY nhs/tests/__init__.py /app/nhs/tests
+RUN mkdir -p /app/nhs_test_files/full
+COPY nhs/tests/resources/xls/9781fb726a6213cc8e52c5d5c2b6aa9ad77a11f0.xlsx /app/nhs_test_files/full
+RUN echo $(ls -1R .)
 # RUN apt-get install -y vim
 
 RUN mkdir -p /app/nhs_files
+# ENV FILES_STORE="/app/nhs_test_files"
 ENV FILES_STORE="/app/nhs_files"
 ENV MONGO_URI='mongodb://mongo_db:27017/'
 

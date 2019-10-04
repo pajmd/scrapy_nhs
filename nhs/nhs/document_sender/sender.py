@@ -5,7 +5,10 @@ Implement a Kafka producer
 from kafka import KafkaProducer
 from json import dumps
 from contextlib import contextmanager
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class MessageProducer(object):
 
@@ -28,6 +31,8 @@ class MessageProducer(object):
             raise
 
     def send(self, documents):
+        logger.debug("Sending %d documments" % len(documents))
+        print("Sending %d documments" % len(documents))
         for document in documents:
             # document.pop('digest')
             data = {'doc': document}
