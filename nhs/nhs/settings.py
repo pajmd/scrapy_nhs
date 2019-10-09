@@ -103,6 +103,8 @@ VALIDATE = False
 KAFKA_HOST = os.environ.get('KAFKA_HOST', 'localhost')
 KAFKA_PORT = os.environ.get('KAFKA_PORT', 9092)
 TOPIC = 'scrapypipe'
+BULK_SEND = True if os.environ.get('BULK_SEND', 'False').lower() in ['true', 'yes'] else False
+BULK_SIZE = os.environ.get('BULK_SIZE', 100)
 # VALIDATION_SCHEMA = {
 #    'validator': {
 #       '$jsonSchema': {

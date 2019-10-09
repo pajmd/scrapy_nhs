@@ -17,7 +17,7 @@ COPY nhs/tests/test_kafka_pipeline.py /app/nhs/tests
 COPY nhs/tests/utiltest.py /app/nhs/tests
 COPY nhs/tests/__init__.py /app/nhs/tests
 RUN mkdir -p /app/nhs_test_files/full
-COPY nhs/tests/resources/xls/9781fb726a6213cc8e52c5d5c2b6aa9ad77a11f0.xlsx /app/nhs_test_files/full
+COPY nhs/tests/resources/xls /app/nhs_test_files/full
 RUN echo $(ls -1R .)
 # RUN apt-get install -y vim
 

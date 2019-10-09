@@ -172,7 +172,7 @@ class KafkaPipeline(object):
                 documents = self.converttojson(file)
                 print("sending %s with %d documents" % (filename, len(documents)))
                 with MessageProducer(self.kafka_host, self.kafka_port, self.topic) as producer:
-                    producer.send(documents)
+                    producer.send(documents, filename)
             except Exception as ex:
                 logger.exception("Failed proccessing file %s - %s" % (filename, ex))
                 raise

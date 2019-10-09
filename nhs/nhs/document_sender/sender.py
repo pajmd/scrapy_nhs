@@ -4,6 +4,7 @@ Implement a Kafka producer
 '''
 from kafka import KafkaProducer, errors
 from json import dumps
+from settings import BULK_SEND, BULK_SIZE
 from contextlib import contextmanager
 import time
 import logging
@@ -47,13 +48,39 @@ class MessageProducer(object):
             self.producer.close()
             raise
 
-    def send(self, documents):
-        logger.debug("Sending %d documments" % len(documents))
-        print("Sending %d documments" % len(documents))
-        for document in documents:
-            # document.pop('digest')
-            data = {'doc': document}
-            self.producer.send(self.topic, value=data)
+    def send(self, documents, filename=None):
+        logger.debug("Sending %d documments - bulk: %s" % (len(documents), BULK_SEND))
+        print("Sending %d documments - bulk: %s" % (len(documents), BULK_SEND))
+        if BULK_SEND:
+            logger.debug('Bulk send')
+            self.send_in_bluk(documents, BULK_SIZE, filename)
+        else:
+            for document in documents:
+                # document.pop('digest')
+                data = {'doc': document}
+                self.producer.send(self.topic, value=data)
+
+    def send_in_bluk(self, documents, bulk_size, filename=None):
+        doc_len = len(documents)
+        l = doc_len // bulk_size
+        l = l if not doc_len % bulk_size else l + 1
+        for i in range(l):
+            lower = i * bulk_size
+            high_mark = (i +1) * bulk_size
+            upper =  high_mark if high_mark < doc_len else doc_len
+            logger.debug('Sending file: %s - chunk [%d - %d]' % (filename, lower, upper))
+            chunk = documents[lower : upper]
+            self.send_chunk(chunk, filename)
+        return l
+
+    def send_chunk(self, chunk, filename):
+        data = {
+            'doc': {
+                'bulk': chunk,
+                'filename': filename
+            }
+        }
+        self.producer.send(self.topic, value=data)
 
     def close(self):
         self.producer.close()
