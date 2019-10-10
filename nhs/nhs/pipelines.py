@@ -175,7 +175,8 @@ class KafkaPipeline(object):
                     producer.send(documents, filename)
             except Exception as ex:
                 logger.exception("Failed proccessing file %s - %s" % (filename, ex))
-                raise
+                # commenting out raise to process next files
+                # raise
         return item
 
     def converttojson(self, file):

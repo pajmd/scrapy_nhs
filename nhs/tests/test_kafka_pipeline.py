@@ -3,9 +3,18 @@ from . import utiltest
 import settings
 import logging
 import pdb
+import sys
 
 
+# root logger
 logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(filename)s: %(lineno)d  - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 
 def test_feed_files_to_pipeline():
     logger.debug('Entering test')
