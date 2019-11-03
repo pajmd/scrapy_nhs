@@ -3,7 +3,7 @@
 #
 # make -f Makefile-docker
 #
-NAME   := pjmd-ubuntu:5001/scrapy-nhs
+NAME   := pjmd-ubuntu.com/scrapy-nhs
 TAG    := $$(git describe --tag)
 IMG    := ${NAME}:${TAG}
 LATEST := ${NAME}:latest
@@ -13,7 +13,7 @@ build:
 	@docker tag ${IMG} ${LATEST}
 
 push:
-	@docker push pjmd-ubuntu:5001/${NAME}
+	@docker push ${IMG}
 
 # login:
 #   @docker log -u ${DOCKER_USER} -p ${DOCKER_PASS}
