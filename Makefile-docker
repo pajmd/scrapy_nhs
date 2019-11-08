@@ -3,14 +3,19 @@
 #
 # make -f Makefile-docker
 #
-NAME   := pjmd-ubuntu.com/scrapy-nhs
+APP    := scrapy-nhs
+PUBLIC_REPO := pajmd
+NAME   := pjmd-ubuntu.com/${APP}
 TAG    := $$(git describe --tag)
 IMG    := ${NAME}:${TAG}
 LATEST := ${NAME}:latest
+PUBLIC_IMG := ${PUBLIC_REPO}/${APP}:${TAG}
 
 build:
+	@git fetch origin
 	@docker build -t ${IMG} --build-arg GIT_VERSION=${TAG} .
 	@docker tag ${IMG} ${LATEST}
+	@docker tag ${IMG} ${PUBLIC_IMG}
 
 push:
 	@docker push ${IMG}
