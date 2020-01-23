@@ -1092,7 +1092,7 @@
     <processor class="solr.RunUpdateProcessorFactory"/>
   </updateRequestProcessorChain>
   -->
-  <!-- Deduplication added 20191122
+  <!-- Deduplication added: 20191122
        An example dedup update processor that creates the "id" field
        on the fly based on the hash code of some other fields.  This
        example has overwriteDupes set to false since we are using the
